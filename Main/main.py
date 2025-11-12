@@ -33,12 +33,16 @@ def main(inputArguments):
     # 2. Load training CSV data (train_subtask1.csv)
     #   - required columns: user_id, text, valence (float in [-2,2]), arousal (float in [0,2])
     #   - drop NaNs, basic whitespace cleanup
-
+    from data_ingest import ingest
+    entries = ingest()
 
     # 3. Define bins for classification labels:
     #    - Valence: 5 bins over [-2, 2] -> class ids {0..4}
     #    - Arousal: 3 bins over [ 0, 2] -> class ids {0..2}
-
+    for e in entries:
+        #Compute class ids for valence and arousal and update the Entry object.
+        e.valence_class = entry.valence + 2 #Range 0,1,2,3,4
+        e.arousal_class = entry.arousal #Range 0,1,2
 
     # 4. Preprocess -> tokenize
     #   - use Hugging Face tokenzier for RoBERTa (padding=True, truncation=True, max_length=128-256)
