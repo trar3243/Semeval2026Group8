@@ -125,7 +125,7 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
         dev_entries = dataset.devSet
 
         for i in range(0, len(dev_entries), batch_size):
-            batch = Batch(dev_entries[i : i + batch_size])
+            batch = Batch(dev_entries[i : i + batch_size], dataset.roberta)
 
             # Features for this dev batch (reuses existing Batch logic & Roberta)
             features = batch.getFeatures()  # [B, 768]
@@ -214,7 +214,9 @@ def main(inputArguments):
     # 4. Preprocess -> tokenize
     #   - use Hugging Face tokenizer for RoBERTa
     #   - create dataset/dataloader and return input_ids, attention_mask, y_valence_class, y_arousal_class
-    dataset = Dataset(entries)  # splits into training and dev set
+    # dataset = Dataset(entries)  # splits into training and dev set
+    roberta = Roberta()            # create only once
+    dataset = Dataset(entries, roberta)
 
     # 5. Build model
     model = ArousalClassifier()
