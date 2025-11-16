@@ -23,6 +23,9 @@ class Batch:
             self.valenceLabelList.append(entry.valence_class)
         self.valenceLabelList = torch.FloatTensor(self.valenceLabelList).to(torch.long)
     def getFeatures(self): # where a lot of time will be taken 
+        # creates its own Roberta() and computes embeddings every time a batch is fetched meaning  inside the training loop
+        # -> very slow, no caching of embeddings between epochs
+        # TODO might want to update later on if needed
         featureList=[]
         roberta=Roberta()
         for entry in self.entryList:
