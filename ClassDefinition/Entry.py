@@ -13,5 +13,5 @@ class Entry:
 
     def __repr__(self):
         return (
-            f"Entry(user_id={self.user_id}, text_id={self.text_id}, text={self.text}, timestamp={self.timestamp}, collection_phase={self.collection_phase}, is_words={self.is_words} valence={self.valence}, arousal={self.arousal}, valence_class={self.valence_class}, arousal_class={self.arousal_class})"
+            f"Entry(user_id={self.user_id}, text_id={self.text_id}, text={self.text}, timestamp={self.timestamp}, collection_phase={self.collection_phase}, is_words={self.is_words}, valence={self.valence}, arousal={self.arousal}, valence_class={self.valence_class}, arousal_class={self.arousal_class})"
         )
