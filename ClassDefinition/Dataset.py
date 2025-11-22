@@ -1,4 +1,5 @@
 import sys, os
+from collections import Counter
 import torch 
 import random 
 from sklearn.model_selection import train_test_split
@@ -13,41 +14,46 @@ class Batch:
         self.roberta = roberta
         self.__init_arousal_label_list__()
         self.__init_valence_label_list__()
+    
     def __init_arousal_label_list__(self):
         self.arousalLabelList = []
         for entry in self.entryList:
             self.arousalLabelList.append(entry.arousal_class)
-        self.arousalLabelList = torch.FloatTensor(self.arousalLabelList).to(torch.long)
+        self.arousalLabelList = torch.tensor(self.arousalLabelList, dtype=torch.float)
+    
     def __init_valence_label_list__(self):
         self.valenceLabelList = []
         for entry in self.entryList:
             self.valenceLabelList.append(entry.valence_class)
-        self.valenceLabelList = torch.FloatTensor(self.valenceLabelList).to(torch.long)
-    def getFeatures(self): # where a lot of time will be taken 
-        # creates its own Roberta() and computes embeddings every time a batch is fetched meaning  inside the training loop
-        # -> very slow, no caching of embeddings between epochs
-        # TODO might want to update later on if needed
-        featureList=[]
-        for entry in self.entryList:
-            self.roberta.setText(entry.text)
-            singleTextEmbedding = self.roberta.getClsEmbedding()[0]
-            featureList.append(torch.FloatTensor(singleTextEmbedding))
-        return torch.stack(featureList)# the feature list is not being stored currently because could take up RAM. Can choose to change this later on.
-    def getLabels(self):
-        return self.arousalLabelList 
+        self.valenceLabelList = torch.tensor(self.valenceLabelList, dtype=torch.float)
+    
+    def getFeatures(self):  
+        self.roberta.setTextList([e.text for e in self.entryList])
+        return self.roberta.getClsEmbedding()
 
 
 class Dataset:
-    def __init__(self, entryList, roberta):
+    def __init__(self, entryList, roberta:Roberta):
         self.roberta = roberta
         self.trainSet, self.devSet = train_test_split(entryList, test_size=0.2, random_state=42)
         self.trainBatchList = None
+        self.devBatchList = None
     def shuffle(self):
         random.shuffle(self.trainSet)
-        random.shuffle(self.devSet) # shouldnt matter
     def setTrainBatchList(self,batchSize):
         self.trainBatchList = []
         for i in range(0, len(self.trainSet), batchSize):
             self.trainBatchList.append(Batch(self.trainSet[i:i+batchSize], self.roberta))
+    def setDevBatchList(self,batchSize):
+        self.devBatchList = [] 
+        for i in range(0, len(self.devSet), batchSize):
+            self.devBatchList.append(Batch(self.devSet[i:i+batchSize], self.roberta))
+    def getDevBatchList(self):
+        return self.devBatchList
     def getTrainBatchList(self):
         return self.trainBatchList
+    def printSetDistribution(self):
+        full_set = self.trainSet + self.devSet
+        valence_class_counts = Counter(item.valence_class for item in full_set)
+        arousal_class_counts = Counter(item.arousal_class for item in full_set)
+        print(f"EntryList has following distribution:\n\tvalence:{valence_class_counts}\n\tarousal:{arousal_class_counts}") 
