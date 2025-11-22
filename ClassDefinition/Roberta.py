@@ -27,9 +27,18 @@ class Roberta:
         model_name = "roberta-base"  
         self.__tokenizer = RobertaTokenizer.from_pretrained(model_name)
         self.__model = RobertaModel.from_pretrained(model_name) 
-        self.__model.eval() # set to evaluation mode
-    
-    def setText(self, text: str):
+        # for name, param in self.__model.named_parameters():
+        #    param.requires_grad = False
+        #    if "layer.11" in name or "layer.10" in name:   # Only train the last two layers 
+        #        param.requires_grad = True
+    def getTokenizer(self):
+        return self.__tokenizer
+    def getModel(self):
+        return self.__model
+    def getParameters(self):
+        return self.__model.parameters()
+
+    def setTextList(self, text): # text is str list 
         self.text = text
         self.__tokenizeText()
         self.__updateClsEmbedding()
@@ -42,8 +51,7 @@ class Roberta:
     def __updateClsEmbedding(self):
         if(self.tokens == None):
             raise Exception(f"Fatal error: attempt to update cls embedding without self.tokens set")
-        with torch.no_grad():  # no gradient computation needed
-            outputs = self.__model(**self.tokens)
+        outputs = self.__model(**self.tokens)
         self.cls_embedding = outputs.last_hidden_state[:, 0, :] # last hidden state 
     def getClsEmbedding(self):
         return self.cls_embedding
