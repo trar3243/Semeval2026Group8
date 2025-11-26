@@ -2,6 +2,7 @@
 import sys, os, random
 import torch
 import torch.nn.functional as F
+from torchmetrics.classification import F1Score
 
 SEMROOT = os.environ['SEMROOT']
 sys.path.append(SEMROOT)
@@ -10,15 +11,15 @@ from ClassDefinition.Utils import Logger, ArgumentParser
 from ClassDefinition.Entry import Entry
 from ClassDefinition.Roberta import Roberta
 from ClassDefinition.Dataset import Dataset, Batch
-from ClassDefinition.ArousalClassifier import ArousalClassifier
+from ClassDefinition.ArousalClassifier import ArousalClassifier, AffectClassifier
 from losses import build_criterion, compute_single_task_loss
 
 required_arguments = []
 optional_arguments = {
     "dataPath": f"{SEMROOT}/Data/TRAIN_RELEASE_3SEP2025/train_subtask1.csv",
-    "numEpochs": 5,  # 60?
+    "numEpochs": 10,
     "batchSize": 16,
-    "learningRate": 1e-3,
+    "learningRate": 1e-4,
 }
 g_Logger = Logger(__name__)
 g_ArgParse = ArgumentParser()
@@ -50,20 +51,22 @@ def trainingLoop(
     """
     # Note: we keep the existing pattern of constructing batches and
     # letting Batch.getFeatures() internally use Roberta.
-    dataset.shuffle()
     batch_size = int(g_ArgParse.get("batchSize"))
     num_epochs = int(g_ArgParse.get("numEpochs"))
 
     dataset.setTrainBatchList(batch_size)
     train_batch_list = dataset.getTrainBatchList()
 
-    criterion = build_criterion()
+    criterion = torch.nn.SmoothL1Loss() # build_criterion()
     number_of_batches = len(train_batch_list)
     print("Beginning training loop")
-
+        
     for epoch in range(num_epochs):
-        model.train()
+        dataset.shuffle()
         train_losses = []
+        evaluate_arousal_mae(model, dataset)
+        model.train()
+        dataset.roberta.getModel().train()
 
         for j in range(number_of_batches):
             if j % 10 == 0:
@@ -78,19 +81,29 @@ def trainingLoop(
 
             # the labels for arousals for the batch
             arousalLabels = batch.arousalLabelList  # [B] long
+            valenceLabels = batch.valenceLabelList  # [B] long
+            labels = torch.stack([valenceLabels, arousalLabels], dim=1)
 
             optimizer.zero_grad()
 
-            # get logits of the model (should output 3-way)
-            logits = model(features)  # [B, 3]
+            # get predictions of the model
+            predictions = model(features)  # [B, 2]
+                
+            valence_prediction = predictions[:,0]
+            arousal_prediction = predictions[:,1]
+            
+            valence_loss = criterion(valence_prediction, valenceLabels)
+            arousal_loss = criterion(arousal_prediction, arousalLabels)
 
             # get loss
-            loss, log = compute_single_task_loss(logits, arousalLabels, criterion)
-
+            #loss, log = compute_single_task_loss(logits, arousalLabels, criterion)
+            loss = valence_loss+arousal_loss
             # backprop loss
             loss.backward()
 
             # TODO could implement gradient clipping here (small, but helps keep training stable)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(dataset.roberta.getParameters(), 1.0)
 
             # optimizer applies to model
             optimizer.step()
@@ -106,51 +119,55 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     Step 8:
       - Evaluate on the dev set
       - For each dev batch:
-          - features -> logits
-          - probs = softmax(logits)
-          - y_hat_float = sum(probs * bin_centers)
+          - features -> predictions
       - Compute MAE vs the original float arousal labels
     """
     model.eval()
+    dataset.roberta.getModel().eval()
     batch_size = int(g_ArgParse.get("batchSize"))
 
-    # Here we treat the 3 classes as centered at arousal values {0.0, 1.0, 2.0}
-    # which matches how you discretized arousal_class.
-    bin_centers = torch.tensor([0.0, 1.0, 2.0], dtype=torch.float32)
-
-    total_abs_error = 0.0
-    total_count = 0
-
+    #bin_centers = torch.tensor([0.0, 1.0, 2.0], dtype=torch.float32)
+    
+    dataset.setDevBatchList(batch_size)
+    arousal_predictions = []
+    valence_predictions = []
+    arousal_labels=[]
+    valence_labels=[]
     with torch.no_grad():
-        dev_entries = dataset.devSet
+        for dev_batch in dataset.getDevBatchList():
+            features = dev_batch.getFeatures()
+            predictions = model(features) # [B, 2]
 
-        for i in range(0, len(dev_entries), batch_size):
-            batch = Batch(dev_entries[i : i + batch_size], dataset.roberta)
+            valence_predictions_binned = torch.round(predictions[:,0] * 4)
+            arousal_predictions_binned = torch.round(predictions[:,1] * 2)
+            arousal_predictions.append(arousal_predictions_binned)
+            valence_predictions.append(valence_predictions_binned)
+            valence_labels.append((dev_batch.valenceLabelList * 4))
+            arousal_labels.append((dev_batch.arousalLabelList * 2))
 
-            # Features for this dev batch (reuses existing Batch logic & Roberta)
-            features = batch.getFeatures()  # [B, 768]
+    
+    arousal_predictions = torch.cat(arousal_predictions, dim=0)
+    valence_predictions = torch.cat(valence_predictions, dim=0)
+    arousal_labels = torch.cat(arousal_labels, dim=0)
+    valence_labels = torch.cat(valence_labels, dim=0)
 
-            # Logits and probabilities
-            logits = model(features)          # [B, 3]
-            probs = F.softmax(logits, dim=1)  # [B, 3]
+    n = max(1, len(arousal_predictions) // 10)
+    print(f"Valence predictions: {valence_predictions[:n]}")
+    print(f"Valence labels     : {valence_labels[:n]}")
+    print(f"Arousal predictions: {arousal_predictions[:n]}")
+    print(f"Arousal labels     : {arousal_labels[:n]}")
 
-            # Expected arousal value per example using bin centers
-            # y_hat_float: [B]
-            y_hat_float = (probs * bin_centers).sum(dim=1)
+    valence_mae = (valence_predictions - valence_labels).abs().mean()
+    arousal_mae = (arousal_predictions - arousal_labels).abs().mean()
+    print(f"Dev MAE — Valence: {valence_mae:.4f}, Arousal: {arousal_mae:.4f}")
 
-            # True continuous arousal labels from the entries
-            true_arousal = torch.tensor(
-                [float(e.arousal) for e in batch.entryList],
-                dtype=torch.float32,
-            )
-
-            abs_errors = (y_hat_float - true_arousal).abs()
-            total_abs_error += abs_errors.sum().item()
-            total_count += abs_errors.numel()
-
-    mae = total_abs_error / max(total_count, 1)
-    print(f"Dev MAE (arousal): {mae:.4f}")
-    return mae
+    f1 = F1Score(task='multiclass',num_classes=3, average='macro')
+    f1ScoreArousal = f1(target=arousal_labels.long(), preds=arousal_predictions.long())
+    f1 = F1Score(task='multiclass',num_classes=5, average='macro')
+    f1ScoreValence = f1(target=valence_labels.long(), preds=valence_predictions.long())
+    print(f"Dev F1 (arousal): {f1ScoreArousal:.4f}")
+    print(f"Dev F1 (valence): {f1ScoreValence:.4f}")
+    return (valence_mae, arousal_mae) 
 
 
 def save_model_and_bins(model: torch.nn.Module):
@@ -206,10 +223,10 @@ def main(inputArguments):
     #    - Arousal: 3 bins over [ 0, 2] -> class ids {0..2}
     for e in entries:
         # Compute class ids for valence and arousal and update the Entry object.
-        e.valence_class = int(round(float(e.valence))) + 2
-        e.valence_class = max(0, min(4, e.valence_class))  # 0..4
-        e.arousal_class = int(round(float(e.arousal)))
-        e.arousal_class = max(0, min(2, e.arousal_class))  # 0..2
+        e.valence_class = float(e.valence) + 2.0
+        e.valence_class = (max(0.0, min(4.0, e.valence_class)))/4  # 0..4
+        e.arousal_class = float(e.arousal)
+        e.arousal_class = (max(0.0, min(2.0, e.arousal_class)))/2  # 0..2
 
     # 4. Preprocess -> tokenize
     #   - use Hugging Face tokenizer for RoBERTa
@@ -217,14 +234,18 @@ def main(inputArguments):
     # dataset = Dataset(entries)  # splits into training and dev set
     roberta = Roberta()            # create only once
     dataset = Dataset(entries, roberta)
-
+    dataset.printSetDistribution()
     # 5. Build model
-    model = ArousalClassifier()
+    model = AffectClassifier()
 
     # 6. Loss and optimizer
     learning_rate = float(g_ArgParse.get("learningRate"))
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-
+    #optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.AdamW([
+        {"params": model.parameters(), "lr": learning_rate},      # head
+        {"params": roberta.getParameters(), "lr": 2e-5},    # only last layers
+    ])
+    
     # 7. Training loop
     trainingLoop(model, optimizer, dataset)
 
