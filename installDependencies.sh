@@ -1,4 +1,4 @@
-packages=(torch transformers pandas scikit-learn)
+packages=(torch transformers pandas scikit-learn torchmetrics)
 for item in "${packages[@]}"; do
     if pip show $item &> /dev/null; then
         echo "Skipping install of $item"
