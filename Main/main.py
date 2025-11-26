@@ -11,15 +11,15 @@ from ClassDefinition.Utils import Logger, ArgumentParser
 from ClassDefinition.Entry import Entry
 from ClassDefinition.Roberta import Roberta
 from ClassDefinition.Dataset import Dataset, Batch
-from ClassDefinition.ArousalClassifier import ArousalClassifier, AffectClassifier
+from ClassDefinition.ArousalClassifier import AffectClassifier
 from losses import build_criterion, compute_single_task_loss
 
 required_arguments = []
 optional_arguments = {
     "dataPath": f"{SEMROOT}/Data/TRAIN_RELEASE_3SEP2025/train_subtask1.csv",
-    "numEpochs": 10,
+    "numEpochs": 5,
     "batchSize": 16,
-    "learningRate": 1e-4,
+    "learningRate": 1e-3,
 }
 g_Logger = Logger(__name__)
 g_ArgParse = ArgumentParser()
@@ -137,13 +137,17 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
         for dev_batch in dataset.getDevBatchList():
             features = dev_batch.getFeatures()
             predictions = model(features) # [B, 2]
-
-            valence_predictions_binned = torch.round(predictions[:,0] * 4)
-            arousal_predictions_binned = torch.round(predictions[:,1] * 2)
+            valence_predictions_binned = torch.clamp(
+                torch.round(predictions[:,0]), min=0, max=4
+            )
+            arousal_predictions_binned = torch.clamp(
+                torch.round(predictions[:,1]), min=0, max=2
+            )
             arousal_predictions.append(arousal_predictions_binned)
             valence_predictions.append(valence_predictions_binned)
-            valence_labels.append((dev_batch.valenceLabelList * 4))
-            arousal_labels.append((dev_batch.arousalLabelList * 2))
+
+            valence_labels.append(dev_batch.valenceLabelList)
+            arousal_labels.append(dev_batch.arousalLabelList)
 
     
     arousal_predictions = torch.cat(arousal_predictions, dim=0)
@@ -224,9 +228,9 @@ def main(inputArguments):
     for e in entries:
         # Compute class ids for valence and arousal and update the Entry object.
         e.valence_class = float(e.valence) + 2.0
-        e.valence_class = (max(0.0, min(4.0, e.valence_class)))/4  # 0..4
+        e.valence_class = max(0.0, min(4.0, e.valence_class))  # 0..4
         e.arousal_class = float(e.arousal)
-        e.arousal_class = (max(0.0, min(2.0, e.arousal_class)))/2  # 0..2
+        e.arousal_class = max(0.0, min(2.0, e.arousal_class))  # 0..2
 
     # 4. Preprocess -> tokenize
     #   - use Hugging Face tokenizer for RoBERTa
@@ -236,7 +240,7 @@ def main(inputArguments):
     dataset = Dataset(entries, roberta)
     dataset.printSetDistribution()
     # 5. Build model
-    model = AffectClassifier()
+    model = AffectClassifier(valence_mean=dataset.valence_mean, arousal_mean=dataset.arousal_mean)
 
     # 6. Loss and optimizer
     learning_rate = float(g_ArgParse.get("learningRate"))

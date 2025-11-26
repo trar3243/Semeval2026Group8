@@ -38,6 +38,11 @@ class Dataset:
         self.trainSet, self.devSet = train_test_split(entryList, test_size=0.2, random_state=42)
         self.trainBatchList = None
         self.devBatchList = None
+        self.__set_valence_arousal_means__()
+    def __set_valence_arousal_means__(self):
+        full_set = self.trainSet + self.devSet 
+        self.valence_mean = sum([item.valence_class for item in full_set]) / len(full_set)
+        self.arousal_mean = sum([item.arousal_class for item in full_set]) / len(full_set)
     def shuffle(self):
         random.shuffle(self.trainSet)
     def setTrainBatchList(self,batchSize):
@@ -57,3 +62,4 @@ class Dataset:
         valence_class_counts = Counter(item.valence_class for item in full_set)
         arousal_class_counts = Counter(item.arousal_class for item in full_set)
         print(f"EntryList has following distribution:\n\tvalence:{valence_class_counts}\n\tarousal:{arousal_class_counts}") 
+        print(f"EntryList has following means:\n\tvalence:{self.valence_mean}\n\tarousal:{self.arousal_mean}") 
