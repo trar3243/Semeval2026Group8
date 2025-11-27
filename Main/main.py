@@ -89,8 +89,8 @@ def trainingLoop(
             # get predictions of the model
             predictions = model(features)  # [B, 2]
                 
-            valence_prediction = predictions[:,0]
-            arousal_prediction = predictions[:,1]
+            valence_prediction = torch.clamp(predictions[:,0], min=0.0, max=4.0)
+            arousal_prediction = torch.clamp(predictions[:,1], min=0.0, max=2.0)
             
             valence_loss = criterion(valence_prediction, valenceLabels)
             arousal_loss = criterion(arousal_prediction, arousalLabels)
