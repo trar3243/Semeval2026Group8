@@ -62,3 +62,29 @@ class AffectClassifier(torch.nn.Module):
                 torch.nn.init.zeros_(layer.bias)
     def forward(self, features: torch.Tensor):
         return torch.sigmoid(self.mlp(features)) # currently using sigmoid 
+
+
+class DualAffectClassifier(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        input_dim = Roberta.output_dimension_size + 1  # CLS + is_words
+        hidden = input_dim // 2
+
+        self.valence_head = torch.nn.Sequential(
+            torch.nn.Linear(input_dim, hidden),
+            torch.nn.GELU(),
+            torch.nn.Dropout(0.1),
+            torch.nn.Linear(hidden, 1)
+        )
+
+        self.arousal_head = torch.nn.Sequential(
+            torch.nn.Linear(input_dim, hidden),
+            torch.nn.GELU(),
+            torch.nn.Dropout(0.1),
+            torch.nn.Linear(hidden, 1)
+        )
+
+    def forward(self, features):
+        v = torch.sigmoid(self.valence_head(features))  # [0,1]
+        a = torch.sigmoid(self.arousal_head(features))
+        return v.squeeze(-1), a.squeeze(-1)
