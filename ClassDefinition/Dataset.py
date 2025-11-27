@@ -29,7 +29,9 @@ class Batch:
     
     def getFeatures(self):  
         self.roberta.setTextList([e.text for e in self.entryList])
-        return self.roberta.getClsEmbedding()
+        extra_feature = torch.tensor([e.is_words for e in self.entryList]).unsqueeze(1) # b,1 
+        cls = self.roberta.getClsEmbedding() # b, 768 
+        return torch.cat([cls, extra_feature], dim=1) # b, 769 
 
 
 class Dataset:
