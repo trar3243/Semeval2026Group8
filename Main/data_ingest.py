@@ -5,7 +5,7 @@ import os, sys
 SEMROOT = os.environ['SEMROOT']
 sys.path.append(SEMROOT)
 from ClassDefinition.Entry import Entry
-
+from ClassDefinition.Utils import convertStringToFloat 
 def ingest(dataPath):
     
     #Objects for each CSV row, append to entries
@@ -22,7 +22,7 @@ def ingest(dataPath):
                 e.text = row.get('text')
                 e.timestamp = row.get('timestamp')
                 e.collection_phase = row.get('collection_phase')
-                e.is_words = row.get('is_words')
+                e.is_words = convertStringToFloat(row.get('is_words'))
                 e.valence = float(row.get('valence'))
                 e.arousal = float(row.get('arousal'))
                 #Append this csv row's data to entries

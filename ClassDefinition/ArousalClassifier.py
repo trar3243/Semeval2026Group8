@@ -47,7 +47,7 @@ class ValenceClassifier(torch.nn.Module):
 class AffectClassifier(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.input_dimension_size = Roberta.output_dimension_size 
+        self.input_dimension_size = Roberta.output_dimension_size + 1 # 1 is for is_words  
         self.hidden_dim = self.input_dimension_size//2
         self.mlp = torch.nn.Sequential(
             torch.nn.Linear(self.input_dimension_size, self.hidden_dim), # CLS embeddings to hidden layer 

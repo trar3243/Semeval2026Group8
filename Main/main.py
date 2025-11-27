@@ -17,9 +17,9 @@ from losses import build_criterion, compute_single_task_loss
 required_arguments = []
 optional_arguments = {
     "dataPath": f"{SEMROOT}/Data/TRAIN_RELEASE_3SEP2025/train_subtask1.csv",
-    "numEpochs": 10,
+    "numEpochs": 5,
     "batchSize": 16,
-    "learningRate": 1e-4,
+    "learningRate": 1e-3,
 }
 g_Logger = Logger(__name__)
 g_ArgParse = ArgumentParser()
