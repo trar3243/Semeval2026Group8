@@ -11,7 +11,7 @@ from ClassDefinition.Utils import Logger, ArgumentParser
 from ClassDefinition.Entry import Entry
 from ClassDefinition.Roberta import Roberta
 from ClassDefinition.Dataset import Dataset, Batch
-from ClassDefinition.ArousalClassifier import ArousalClassifier, AffectClassifier
+from ClassDefinition.ArousalClassifier import ArousalClassifier, AffectClassifier, DualAffectClassifier
 from losses import build_criterion, compute_single_task_loss
 
 required_arguments = []
@@ -87,11 +87,17 @@ def trainingLoop(
             optimizer.zero_grad()
 
             # get predictions of the model
-            predictions = model(features)  # [B, 2]
+            # predictions = model(features)  # [B, 2]
                 
-            valence_prediction = predictions[:,0]
-            arousal_prediction = predictions[:,1]
+            # valence_prediction = predictions[:,0]
+            # arousal_prediction = predictions[:,1]
             
+            # valence_loss = criterion(valence_prediction, valenceLabels)
+            # arousal_loss = criterion(arousal_prediction, arousalLabels)
+
+            # update training loop to handle two heads separately
+            valence_prediction, arousal_prediction = model(features)
+
             valence_loss = criterion(valence_prediction, valenceLabels)
             arousal_loss = criterion(arousal_prediction, arousalLabels)
 
@@ -136,12 +142,18 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     with torch.no_grad():
         for dev_batch in dataset.getDevBatchList():
             features = dev_batch.getFeatures()
-            predictions = model(features) # [B, 2]
+            # predictions = model(features) # [B, 2]
 
-            valence_predictions_binned = torch.round(predictions[:,0] * 4)
-            arousal_predictions_binned = torch.round(predictions[:,1] * 2)
-            arousal_predictions.append(arousal_predictions_binned)
+            # valence_predictions_binned = torch.round(predictions[:,0] * 4)
+            # arousal_predictions_binned = torch.round(predictions[:,1] * 2)
+            val_pred, aro_pred = model(features)
+
+            valence_predictions_binned = torch.round(val_pred * 4)
+            arousal_predictions_binned = torch.round(aro_pred * 2)
+
             valence_predictions.append(valence_predictions_binned)
+            arousal_predictions.append(arousal_predictions_binned)
+
             valence_labels.append((dev_batch.valenceLabelList * 4))
             arousal_labels.append((dev_batch.arousalLabelList * 2))
 
@@ -252,7 +264,9 @@ def main(inputArguments):
     dataset = Dataset(entries, roberta)
     dataset.printSetDistribution()
     # 5. Build model
-    model = AffectClassifier()
+    # model = AffectClassifier() 
+    model = DualAffectClassifier() # dual-head model version
+
 
     # 6. Loss and optimizer
     learning_rate = float(g_ArgParse.get("learningRate"))
