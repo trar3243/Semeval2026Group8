@@ -19,13 +19,13 @@ class Batch:
         self.arousalLabelList = []
         for entry in self.entryList:
             self.arousalLabelList.append(entry.arousal_class)
-        self.arousalLabelList = torch.tensor(self.arousalLabelList, dtype=torch.float)
+        self.arousalLabelList = torch.tensor(self.arousalLabelList, dtype=torch.long)
     
     def __init_valence_label_list__(self):
         self.valenceLabelList = []
         for entry in self.entryList:
             self.valenceLabelList.append(entry.valence_class)
-        self.valenceLabelList = torch.tensor(self.valenceLabelList, dtype=torch.float)
+        self.valenceLabelList = torch.tensor(self.valenceLabelList, dtype=torch.long)
     
     def getFeatures(self):  
         self.roberta.setTextList([e.text for e in self.entryList])
