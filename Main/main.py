@@ -11,7 +11,7 @@ from ClassDefinition.Utils import Logger, ArgumentParser
 from ClassDefinition.Entry import Entry
 from ClassDefinition.Roberta import Roberta
 from ClassDefinition.Dataset import Dataset, Batch
-from ClassDefinition.ArousalClassifier import ArousalClassifier, AffectClassifier
+from ClassDefinition.ArousalClassifier import AffectClassifier
 from losses import build_criterion, compute_single_task_loss
 
 required_arguments = []
@@ -57,7 +57,7 @@ def trainingLoop(
     dataset.setTrainBatchList(batch_size)
     train_batch_list = dataset.getTrainBatchList()
 
-    criterion = torch.nn.SmoothL1Loss() # build_criterion()
+    criterion = torch.nn.CrossEntropyLoss() # build_criterion()
     number_of_batches = len(train_batch_list)
     print("Beginning training loop")
         
@@ -89,11 +89,11 @@ def trainingLoop(
             # get predictions of the model
             predictions = model(features)  # [B, 2]
                 
-            valence_prediction = predictions[:,0]
-            arousal_prediction = predictions[:,1]
+            valence_logits = predictions["valence_logits"]
+            arousal_logits = predictions["arousal_logits"]
             
-            valence_loss = criterion(valence_prediction, valenceLabels)
-            arousal_loss = criterion(arousal_prediction, arousalLabels)
+            valence_loss = criterion(valence_logits, valenceLabels)
+            arousal_loss = criterion(arousal_logits, arousalLabels)
 
             # get loss
             #loss, log = compute_single_task_loss(logits, arousalLabels, criterion)
@@ -126,8 +126,6 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     dataset.roberta.getModel().eval()
     batch_size = int(g_ArgParse.get("batchSize"))
 
-    #bin_centers = torch.tensor([0.0, 1.0, 2.0], dtype=torch.float32)
-    
     dataset.setDevBatchList(batch_size)
     arousal_predictions = []
     valence_predictions = []
@@ -136,14 +134,16 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     with torch.no_grad():
         for dev_batch in dataset.getDevBatchList():
             features = dev_batch.getFeatures()
-            predictions = model(features) # [B, 2]
-
-            valence_predictions_binned = torch.round(predictions[:,0] * 4)
-            arousal_predictions_binned = torch.round(predictions[:,1] * 2)
+            logits = model(features) # [B, 2]
+            valence_logits = logits["valence_logits"]
+            arousal_logits = logits["arousal_logits"]
+            valence_predictions_binned = valence_logits.argmax(dim=-1)
+            arousal_predictions_binned = arousal_logits.argmax(dim=-1)
             arousal_predictions.append(arousal_predictions_binned)
             valence_predictions.append(valence_predictions_binned)
-            valence_labels.append((dev_batch.valenceLabelList * 4))
-            arousal_labels.append((dev_batch.arousalLabelList * 2))
+
+            valence_labels.append(dev_batch.valenceLabelList)
+            arousal_labels.append(dev_batch.arousalLabelList)
 
     
     arousal_predictions = torch.cat(arousal_predictions, dim=0)
@@ -157,8 +157,8 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     print(f"Arousal predictions: {arousal_predictions[:n]}")
     print(f"Arousal labels     : {arousal_labels[:n]}")
 
-    valence_mae = (valence_predictions - valence_labels).abs().mean()
-    arousal_mae = (arousal_predictions - arousal_labels).abs().mean()
+    valence_mae = (valence_predictions.float() - valence_labels.float()).abs().mean()
+    arousal_mae = (arousal_predictions.float() - arousal_labels.float()).abs().mean()
     print(f"Dev MAE — Valence: {valence_mae:.4f}, Arousal: {arousal_mae:.4f}")
 
     f1 = F1Score(task='multiclass',num_classes=3, average='macro')
@@ -239,10 +239,10 @@ def main(inputArguments):
     #    - Arousal: 3 bins over [ 0, 2] -> class ids {0..2}
     for e in entries:
         # Compute class ids for valence and arousal and update the Entry object.
-        e.valence_class = float(e.valence) + 2.0
-        e.valence_class = (max(0.0, min(4.0, e.valence_class)))/4  # 0..4
-        e.arousal_class = float(e.arousal)
-        e.arousal_class = (max(0.0, min(2.0, e.arousal_class)))/2  # 0..2
+        e.valence_class = e.valence + 2
+        e.valence_class = max(0, min(4, e.valence_class))  # 0..4
+        e.arousal_class = e.arousal
+        e.arousal_class = max(0, min(2, e.arousal_class))  # 0..2
 
     # 4. Preprocess -> tokenize
     #   - use Hugging Face tokenizer for RoBERTa
