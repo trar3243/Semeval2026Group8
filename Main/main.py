@@ -2,7 +2,7 @@
 import sys, os, random
 import torch
 import torch.nn.functional as F
-from torchmetrics.classification import F1Score
+from torchmetrics.classification import F1Score, Accuracy, Precision, Recall
 
 SEMROOT = os.environ['SEMROOT']
 sys.path.append(SEMROOT)
@@ -167,7 +167,23 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     f1ScoreValence = f1(target=valence_labels.long(), preds=valence_predictions.long())
     print(f"Dev F1 (arousal): {f1ScoreArousal:.4f}")
     print(f"Dev F1 (valence): {f1ScoreValence:.4f}")
-    return (valence_mae, arousal_mae) 
+
+    AccuracyArousal = Accuracy(task='multiclass', num_classes=3, average='macro')(arousal_predictions.long(), arousal_labels.long())
+    AccuracyValence = Accuracy(task='multiclass', num_classes=5, average='macro')(valence_predictions.long(), valence_labels.long())
+    print(f"Dev Accuracy (arousal): {AccuracyArousal:.4f}")
+    print(f"Dev Accuracy (valence): {AccuracyValence:.4f}")
+
+    PrecisionArousal = Precision(task='multiclass', num_classes=3, average='macro')(arousal_predictions.long(), arousal_labels.long())
+    PrecisionValence = Precision(task='multiclass', num_classes=5, average='macro')(valence_predictions.long(), valence_labels.long())
+    print(f"Dev Precision (arousal): {PrecisionArousal:.4f}")
+    print(f"Dev Precision (valence): {PrecisionValence:.4f}")
+
+    RecallArousal  = Recall(task='multiclass', num_classes=3, average='macro')(arousal_predictions.long(), arousal_labels.long())
+    RecallValence  = Recall(task='multiclass', num_classes=5, average='macro')(valence_predictions.long(), valence_labels.long())
+    print(f"Dev Recall (arousal): {RecallArousal:.4f}")
+    print(f"Dev Recall (valence): {RecallArousal:.4f}")
+    
+    return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence) 
 
 
 def save_model_and_bins(model: torch.nn.Module):

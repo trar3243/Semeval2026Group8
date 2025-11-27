@@ -53,3 +53,12 @@ class ArgumentParser:
     def printArguments(self):
         for argument in self.arguments:
             print(f"\tKey:{argument}\tValue:{self.arguments[argument]}")
+
+def convertStringToFloat(string: str): 
+    string = string.lower()
+    if(string == "false"):
+        return 0.0
+    elif(string == "true"):
+        return 1.0
+    else:
+        raise Exception(f"Input {string} not in: false, true")
