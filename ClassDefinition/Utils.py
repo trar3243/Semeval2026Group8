@@ -1,4 +1,5 @@
 import logging 
+import torch 
 
 class Logger:
     def __init__(self, name, level=20): # 10 for debug, 20 for info, 30 for warning, 40 for error, 50 for critical 
@@ -62,3 +63,36 @@ def convertStringToFloat(string: str):
         return 1.0
     else:
         raise Exception(f"Input {string} not in: false, true")
+
+def createSoftLabels(targets, number_of_classes, sigma=0.5): # will return an array with decreasing values away from true label  
+    # because the classes are bins, lessen loss for "Close" guesses 
+    # the labels sum to 1 
+    device = targets.device 
+    batch_size = targets.size(0)
+    soft_labels = torch.zeros(batch_size, number_of_classes, device=device)
+
+    # Create Gaussian probabilities for each class
+    class_indices = torch.arange(number_of_classes, device=device).float().unsqueeze(0)  # (1, num_classes)
+    targets_float = targets.float().unsqueeze(1)  # (batch_size, 1)
+
+    # Gaussian probability: exp(-(x - mu)^2 / (2*sigma^2))
+    soft_labels = torch.exp(-0.5 * ((class_indices - targets_float) / sigma)**2)
+
+    # Normalize to sum to 1
+    soft_labels = soft_labels / soft_labels.sum(dim=1, keepdim=True)
+    return soft_labels
+
+    device = targets.device 
+
+    batch_size = targets.size(0) # get number of batches 
+    soft_labels = torch.zeros(batch_size, number_of_classes, device=device)
+
+    class_indices = torch.arange(number_of_classes, device=device).float().unsqueeze(0)  # (1, num_classes)
+    targets_float = targets.float().unsqueeze(1)  # (batch_size, 1)
+    
+    scale = 4 / (number_of_classes - 1)
+    soft_labels = torch.exp(-torch.abs(class_indices - targets_float) * scale)
+    
+    # Normalize to sum to 1
+    # soft_labels = soft_labels / soft_labels.sum(dim=1, keepdim=True)
+    return soft_labels

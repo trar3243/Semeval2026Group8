@@ -7,7 +7,7 @@ from torchmetrics.classification import F1Score, Accuracy, Precision, Recall
 SEMROOT = os.environ['SEMROOT']
 sys.path.append(SEMROOT)
 
-from ClassDefinition.Utils import Logger, ArgumentParser
+from ClassDefinition.Utils import Logger, ArgumentParser, createSoftLabels
 from ClassDefinition.Entry import Entry
 from ClassDefinition.Roberta import Roberta
 from ClassDefinition.Dataset import Dataset, Batch
@@ -19,7 +19,7 @@ optional_arguments = {
     "dataPath": f"{SEMROOT}/Data/TRAIN_RELEASE_3SEP2025/train_subtask1.csv",
     "numEpochs": 5,
     "batchSize": 16,
-    "learningRate": 1e-3,
+    "learningRate": 5e-5,
 }
 g_Logger = Logger(__name__)
 g_ArgParse = ArgumentParser()
@@ -57,7 +57,7 @@ def trainingLoop(
     dataset.setTrainBatchList(batch_size)
     train_batch_list = dataset.getTrainBatchList()
 
-    criterion = torch.nn.CrossEntropyLoss() # build_criterion()
+    criterion = torch.nn.KLDivLoss(reduction='batchmean') # build_criterion()
     number_of_batches = len(train_batch_list)
     print("Beginning training loop")
         
@@ -80,9 +80,9 @@ def trainingLoop(
             features = batch.getFeatures()  # [B, 768]
 
             # the labels for arousals for the batch
-            arousalLabels = batch.arousalLabelList  # [B] long
-            valenceLabels = batch.valenceLabelList  # [B] long
-            labels = torch.stack([valenceLabels, arousalLabels], dim=1)
+            arousalLabels = createSoftLabels(batch.arousalLabelList, 3)  # [B] long
+            valenceLabels = createSoftLabels(batch.valenceLabelList, 5)  # [B] long
+            # labels = torch.stack([valenceLabels, arousalLabels], dim=1)
 
             optimizer.zero_grad()
 
@@ -91,9 +91,10 @@ def trainingLoop(
                 
             valence_logits = predictions["valence_logits"]
             arousal_logits = predictions["arousal_logits"]
-            
-            valence_loss = criterion(valence_logits, valenceLabels)
-            arousal_loss = criterion(arousal_logits, arousalLabels)
+            valence_log_probs = F.log_softmax(valence_logits, dim=1) 
+            arousal_log_probs = F.log_softmax(arousal_logits, dim=1) 
+            valence_loss = criterion(valence_log_probs, valenceLabels)
+            arousal_loss = criterion(arousal_log_probs, arousalLabels)
 
             # get loss
             #loss, log = compute_single_task_loss(logits, arousalLabels, criterion)
@@ -259,7 +260,7 @@ def main(inputArguments):
     #optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
     optimizer = torch.optim.AdamW([
         {"params": model.parameters(), "lr": learning_rate},      # head
-        {"params": roberta.getParameters(), "lr": 2e-5},    # only last layers
+        {"params": roberta.getParameters(), "lr": learning_rate},    # only last layers
     ])
     
     # 7. Training loop
