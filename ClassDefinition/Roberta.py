@@ -46,7 +46,7 @@ class Roberta:
         return self.text 
     def __tokenizeText(self):
         self.tokens=self.__tokenizer(self.text, return_tensors="pt", padding=True, truncation=True) # gotta check what the pt means; found in docs 
-        
+            
     
     def __updateClsEmbedding(self):
         if(self.tokens == None):
