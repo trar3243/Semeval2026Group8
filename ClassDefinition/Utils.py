@@ -62,3 +62,4 @@ def convertStringToFloat(string: str):
         return 1.0
     else:
         raise Exception(f"Input {string} not in: false, true")
+
