@@ -205,7 +205,7 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     Combined_Predictions = (arousal_predictions.long() * 5) + valence_predictions.long()
     Combined_Labels = (arousal_labels.long() * 5) + valence_labels.long() 
     #Calculate F1 from combined labels, predictions
-    CombinedF1  = F1(task='multiclass', num_classes=15, average='macro')(Combined_Predictions, Combined_Labels)
+    CombinedF1  = F1Score(task='multiclass', num_classes=15, average='macro')(Combined_Predictions, Combined_Labels)
     print(f"Combined F1: {CombinedF1:.4f}")
     
     return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1)
