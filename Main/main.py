@@ -17,6 +17,7 @@ from losses import build_criterion, compute_single_task_loss
 required_arguments = []
 optional_arguments = {
     "dataPath": f"{SEMROOT}/Data/TRAIN_RELEASE_3SEP2025/train_subtask1.csv",
+    "lexiconLookupPath": f"{SEMROOT}/Data/Ratings_Warriner_et_al.csv",
     "numEpochs": 5,
     "batchSize": 16,
     "learningRate": 1e-3,
@@ -79,7 +80,13 @@ def trainingLoop(
             # all CLS embeddings of each entry in batch
             cls_embeddings = batch.getClsEmbeddings()  # [B, 768]
             user_indices = batch.getUserIndices()
-            is_words = batch.getIsWords() 
+            is_words = batch.getIsWords()
+            mean_lexical_valence = batch.getMeanLexicalValence()
+            mean_lexical_arousal = batch.getMeanLexicalArousal()
+            count_lexical_high_valence = batch.getCountLexicalHighValence()
+            count_lexical_low_valence = batch.getCountLexicalLowValence()
+            count_lexical_high_arousal = batch.getCountLexicalHighArousal()
+            count_lexical_low_arousal = batch.getCountLexicalLowArousal()
 
             # the labels for for the batch
             arousalLabels = batch.arousalLabelList  # [B] long
@@ -89,7 +96,7 @@ def trainingLoop(
             optimizer.zero_grad()
 
             # get predictions of the model
-            predictions = model(cls_embeddings, user_indices, is_words)  # [B, 2]
+            predictions = model(cls_embeddings, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
                 
             valence_logits = predictions["valence_logits"]
             arousal_logits = predictions["arousal_logits"]
@@ -143,8 +150,14 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
             cls_embeddings = dev_batch.getClsEmbeddings()
             user_indices = dev_batch.getUserIndices()
             is_words = dev_batch.getIsWords()
+            mean_lexical_valence = dev_batch.getMeanLexicalValence()
+            mean_lexical_arousal = dev_batch.getMeanLexicalArousal()
+            count_lexical_high_valence = dev_batch.getCountLexicalHighValence()
+            count_lexical_low_valence = dev_batch.getCountLexicalLowValence()
+            count_lexical_high_arousal = dev_batch.getCountLexicalHighArousal()
+            count_lexical_low_arousal = dev_batch.getCountLexicalLowArousal()
             
-            logits = model(cls_embeddings, user_indices, is_words) # [B, 2]
+            logits = model(cls_embeddings, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
             valence_logits = logits["valence_logits"]
             arousal_logits = logits["arousal_logits"]
 
@@ -253,7 +266,7 @@ def main(inputArguments):
     #   - required columns: user_id, text, valence (float in [-2,2]), arousal (float in [0,2])
     #   - drop NaNs, basic whitespace cleanup
     roberta = Roberta()            # create only once
-    dataset = Dataset(g_ArgParse.get("dataPath"), roberta)
+    dataset = Dataset(g_ArgParse.get("dataPath"), g_ArgParse.get("lexiconLookupPath"), roberta)
     dataset.printSetDistribution()
     # 3. Define bins for classification labels:
     #    - Valence: 5 bins over [-2, 2] -> class ids {0..4}
