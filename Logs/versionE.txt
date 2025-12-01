@@ -1,0 +1,216 @@
+2025-11-27 17:17:55,359 - __main__ - INFO - ScriptName: ./main.py
+2025-11-27 17:17:55,360 - ClassDefinition.Utils - INFO - Optional argument dataPath not found in input. Continuing...
+2025-11-27 17:17:55,360 - ClassDefinition.Utils - INFO - Optional argument numEpochs not found in input. Continuing...
+2025-11-27 17:17:55,360 - ClassDefinition.Utils - INFO - Optional argument batchSize not found in input. Continuing...
+2025-11-27 17:17:55,360 - ClassDefinition.Utils - INFO - Optional argument learningRate not found in input. Continuing...
+2025-11-27 17:17:55,360 - ClassDefinition.Utils - INFO - 	Key:dataPath	Value:/home/trar3243/PrimaryDocuments/MS-CLASIC/2025-fall/CSCI-5832_natural-language-processing/finalProject/Semeval2026Group8Temp/Semeval2026Group8/Data/TRAIN_RELEASE_3SEP2025/train_subtask1.csv
+2025-11-27 17:17:55,360 - ClassDefinition.Utils - INFO - 	Key:numEpochs	Value:5
+2025-11-27 17:17:55,360 - ClassDefinition.Utils - INFO - 	Key:batchSize	Value:16
+2025-11-27 17:17:55,360 - ClassDefinition.Utils - INFO - 	Key:learningRate	Value:0.001
+2025-11-27 17:17:55,660 - __main__ - INFO - 2764 entries ingested
+2025-11-27 17:17:56,455 - __main__ - INFO - Beginning training loop
+2025-11-27 17:19:13,948 - __main__ - INFO - Valence predictions: tensor([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1])
+2025-11-27 17:19:13,949 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2, 2, 3, 2, 2, 4, 0, 3, 4, 3, 0, 2, 4, 3, 3, 1, 4, 4, 4, 4, 3, 2,
+        2, 1, 2, 4, 0, 2, 1])
+2025-11-27 17:19:13,949 - __main__ - INFO - Arousal predictions: tensor([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1])
+2025-11-27 17:19:13,950 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0, 1, 0, 1, 1, 2, 0, 1, 0, 2, 2, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 2,
+        1, 1, 1, 1, 0, 1, 1])
+2025-11-27 17:19:13,950 - __main__ - INFO - Dev MAE — Valence: 1.4738, Arousal: 0.6112
+2025-11-27 17:19:13,959 - __main__ - INFO - Dev F1 (arousal): 0.1866
+2025-11-27 17:19:13,959 - __main__ - INFO - Dev F1 (valence): 0.0522
+2025-11-27 17:19:13,961 - __main__ - INFO - Dev Accuracy (arousal): 0.3333
+2025-11-27 17:19:13,961 - __main__ - INFO - Dev Accuracy (valence): 0.2000
+2025-11-27 17:19:13,963 - __main__ - INFO - Dev Precision (arousal): 0.1296
+2025-11-27 17:19:13,963 - __main__ - INFO - Dev Precision (valence): 0.0300
+2025-11-27 17:19:13,965 - __main__ - INFO - Dev Recall (arousal): 0.3333
+2025-11-27 17:19:13,965 - __main__ - INFO - Dev Recall (valence): 0.3333
+2025-11-27 17:19:13,966 - __main__ - INFO - 	Epoch:1/5	batch:0/139
+2025-11-27 17:20:38,166 - __main__ - INFO - 	Epoch:1/5	batch:10/139
+2025-11-27 17:21:52,864 - __main__ - INFO - 	Epoch:1/5	batch:20/139
+2025-11-27 17:22:58,155 - __main__ - INFO - 	Epoch:1/5	batch:30/139
+2025-11-27 17:24:11,920 - __main__ - INFO - 	Epoch:1/5	batch:40/139
+2025-11-27 17:25:34,487 - __main__ - INFO - 	Epoch:1/5	batch:50/139
+2025-11-27 17:26:53,354 - __main__ - INFO - 	Epoch:1/5	batch:60/139
+2025-11-27 17:28:47,954 - __main__ - INFO - 	Epoch:1/5	batch:70/139
+2025-11-27 17:29:50,597 - __main__ - INFO - 	Epoch:1/5	batch:80/139
+2025-11-27 17:30:44,769 - __main__ - INFO - 	Epoch:1/5	batch:90/139
+2025-11-27 17:32:00,669 - __main__ - INFO - 	Epoch:1/5	batch:100/139
+2025-11-27 17:33:11,697 - __main__ - INFO - 	Epoch:1/5	batch:110/139
+2025-11-27 17:34:35,437 - __main__ - INFO - 	Epoch:1/5	batch:120/139
+2025-11-27 17:36:40,886 - __main__ - INFO - 	Epoch:1/5	batch:130/139
+2025-11-27 17:37:56,081 - __main__ - INFO - Epoch 1/5 average train loss: 0.8638
+2025-11-27 17:39:33,680 - __main__ - INFO - Valence predictions: tensor([3, 2, 4, 0, 3, 4, 2, 2, 4, 2, 3, 4, 2, 2, 0, 0, 2, 4, 4, 4, 0, 3, 0, 0,
+        3, 4, 3, 3, 3, 2, 3, 2, 0, 3, 4, 4, 2, 3, 3, 2, 0, 0, 4, 3, 3, 4, 4, 2,
+        2, 1, 2, 4, 0, 3, 0])
+2025-11-27 17:39:33,680 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2, 2, 3, 2, 2, 4, 0, 3, 4, 3, 0, 2, 4, 3, 3, 1, 4, 4, 4, 4, 3, 2,
+        2, 1, 2, 4, 0, 2, 1])
+2025-11-27 17:39:33,681 - __main__ - INFO - Arousal predictions: tensor([0, 1, 2, 1, 1, 1, 2, 2, 0, 0, 1, 0, 1, 1, 1, 0, 1, 2, 2, 2, 1, 1, 0, 1,
+        2, 1, 1, 1, 0, 2, 0, 2, 1, 1, 0, 2, 2, 0, 1, 2, 1, 0, 0, 0, 0, 2, 2, 2,
+        2, 1, 2, 1, 0, 1, 1])
+2025-11-27 17:39:33,681 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0, 1, 0, 1, 1, 2, 0, 1, 0, 2, 2, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 2,
+        1, 1, 1, 1, 0, 1, 1])
+2025-11-27 17:39:33,682 - __main__ - INFO - Dev MAE — Valence: 0.7776, Arousal: 0.4322
+2025-11-27 17:39:33,713 - __main__ - INFO - Dev F1 (arousal): 0.6063
+2025-11-27 17:39:33,713 - __main__ - INFO - Dev F1 (valence): 0.3935
+2025-11-27 17:39:33,718 - __main__ - INFO - Dev Accuracy (arousal): 0.6221
+2025-11-27 17:39:33,718 - __main__ - INFO - Dev Accuracy (valence): 0.4380
+2025-11-27 17:39:33,725 - __main__ - INFO - Dev Precision (arousal): 0.5986
+2025-11-27 17:39:33,725 - __main__ - INFO - Dev Precision (valence): 0.4692
+2025-11-27 17:39:33,729 - __main__ - INFO - Dev Recall (arousal): 0.6221
+2025-11-27 17:39:33,729 - __main__ - INFO - Dev Recall (valence): 0.6221
+2025-11-27 17:39:33,731 - __main__ - INFO - 	Epoch:2/5	batch:0/139
+2025-11-27 17:41:22,310 - __main__ - INFO - 	Epoch:2/5	batch:10/139
+2025-11-27 17:42:35,169 - __main__ - INFO - 	Epoch:2/5	batch:20/139
+2025-11-27 17:43:39,342 - __main__ - INFO - 	Epoch:2/5	batch:30/139
+2025-11-27 17:44:51,479 - __main__ - INFO - 	Epoch:2/5	batch:40/139
+2025-11-27 17:46:20,728 - __main__ - INFO - 	Epoch:2/5	batch:50/139
+2025-11-27 17:47:41,142 - __main__ - INFO - 	Epoch:2/5	batch:60/139
+2025-11-27 17:49:45,671 - __main__ - INFO - 	Epoch:2/5	batch:70/139
+2025-11-27 17:50:49,042 - __main__ - INFO - 	Epoch:2/5	batch:80/139
+2025-11-27 17:51:42,743 - __main__ - INFO - 	Epoch:2/5	batch:90/139
+2025-11-27 17:52:58,321 - __main__ - INFO - 	Epoch:2/5	batch:100/139
+2025-11-27 17:54:11,023 - __main__ - INFO - 	Epoch:2/5	batch:110/139
+2025-11-27 17:55:33,007 - __main__ - INFO - 	Epoch:2/5	batch:120/139
+2025-11-27 17:57:34,407 - __main__ - INFO - 	Epoch:2/5	batch:130/139
+2025-11-27 17:58:44,199 - __main__ - INFO - Epoch 2/5 average train loss: 0.6677
+2025-11-27 18:00:16,495 - __main__ - INFO - Valence predictions: tensor([4, 2, 4, 0, 3, 4, 2, 0, 4, 2, 3, 4, 2, 2, 0, 1, 2, 4, 4, 4, 2, 2, 0, 2,
+        4, 4, 4, 2, 4, 2, 4, 2, 1, 4, 4, 4, 2, 4, 4, 2, 2, 1, 4, 4, 4, 4, 4, 2,
+        2, 1, 2, 4, 0, 2, 1])
+2025-11-27 18:00:16,496 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2, 2, 3, 2, 2, 4, 0, 3, 4, 3, 0, 2, 4, 3, 3, 1, 4, 4, 4, 4, 3, 2,
+        2, 1, 2, 4, 0, 2, 1])
+2025-11-27 18:00:16,496 - __main__ - INFO - Arousal predictions: tensor([0, 1, 2, 1, 1, 1, 2, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 2, 1, 2, 1, 1, 0, 1,
+        1, 1, 1, 1, 0, 2, 0, 2, 1, 1, 0, 1, 2, 0, 0, 0, 1, 0, 0, 0, 0, 1, 2, 2,
+        2, 1, 1, 1, 0, 1, 1])
+2025-11-27 18:00:16,497 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0, 1, 0, 1, 1, 2, 0, 1, 0, 2, 2, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 2,
+        1, 1, 1, 1, 0, 1, 1])
+2025-11-27 18:00:16,501 - __main__ - INFO - Dev MAE — Valence: 0.7468, Arousal: 0.3761
+2025-11-27 18:00:16,529 - __main__ - INFO - Dev F1 (arousal): 0.6506
+2025-11-27 18:00:16,529 - __main__ - INFO - Dev F1 (valence): 0.4294
+2025-11-27 18:00:16,531 - __main__ - INFO - Dev Accuracy (arousal): 0.6505
+2025-11-27 18:00:16,531 - __main__ - INFO - Dev Accuracy (valence): 0.4614
+2025-11-27 18:00:16,534 - __main__ - INFO - Dev Precision (arousal): 0.6522
+2025-11-27 18:00:16,534 - __main__ - INFO - Dev Precision (valence): 0.4497
+2025-11-27 18:00:16,536 - __main__ - INFO - Dev Recall (arousal): 0.6505
+2025-11-27 18:00:16,536 - __main__ - INFO - Dev Recall (valence): 0.6505
+2025-11-27 18:00:16,537 - __main__ - INFO - 	Epoch:3/5	batch:0/139
+2025-11-27 18:01:37,764 - __main__ - INFO - 	Epoch:3/5	batch:10/139
+2025-11-27 18:03:05,505 - __main__ - INFO - 	Epoch:3/5	batch:20/139
+2025-11-27 18:04:17,237 - __main__ - INFO - 	Epoch:3/5	batch:30/139
+2025-11-27 18:05:32,532 - __main__ - INFO - 	Epoch:3/5	batch:40/139
+2025-11-27 18:07:00,742 - __main__ - INFO - 	Epoch:3/5	batch:50/139
+2025-11-27 18:08:18,732 - __main__ - INFO - 	Epoch:3/5	batch:60/139
+2025-11-27 18:10:22,377 - __main__ - INFO - 	Epoch:3/5	batch:70/139
+2025-11-27 18:11:24,411 - __main__ - INFO - 	Epoch:3/5	batch:80/139
+2025-11-27 18:12:17,860 - __main__ - INFO - 	Epoch:3/5	batch:90/139
+2025-11-27 18:13:34,045 - __main__ - INFO - 	Epoch:3/5	batch:100/139
+2025-11-27 18:14:46,133 - __main__ - INFO - 	Epoch:3/5	batch:110/139
+2025-11-27 18:16:08,016 - __main__ - INFO - 	Epoch:3/5	batch:120/139
+2025-11-27 18:18:00,745 - __main__ - INFO - 	Epoch:3/5	batch:130/139
+2025-11-27 18:19:11,090 - __main__ - INFO - Epoch 3/5 average train loss: 0.5723
+2025-11-27 18:20:41,936 - __main__ - INFO - Valence predictions: tensor([2, 2, 4, 0, 2, 4, 2, 0, 4, 0, 2, 4, 2, 0, 0, 1, 1, 4, 4, 4, 1, 2, 0, 0,
+        4, 4, 2, 2, 4, 1, 4, 2, 0, 4, 4, 4, 0, 4, 3, 2, 1, 0, 4, 2, 4, 4, 4, 2,
+        2, 1, 2, 4, 0, 2, 0])
+2025-11-27 18:20:41,938 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2, 2, 3, 2, 2, 4, 0, 3, 4, 3, 0, 2, 4, 3, 3, 1, 4, 4, 4, 4, 3, 2,
+        2, 1, 2, 4, 0, 2, 1])
+2025-11-27 18:20:41,939 - __main__ - INFO - Arousal predictions: tensor([0, 2, 2, 1, 0, 1, 2, 2, 0, 0, 1, 0, 0, 1, 1, 0, 0, 2, 1, 2, 1, 1, 0, 2,
+        2, 1, 1, 1, 0, 2, 0, 2, 0, 1, 0, 1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 1, 2, 2,
+        2, 1, 1, 1, 0, 1, 1])
+2025-11-27 18:20:41,939 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0, 1, 0, 1, 1, 2, 0, 1, 0, 2, 2, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 2,
+        1, 1, 1, 1, 0, 1, 1])
+2025-11-27 18:20:41,943 - __main__ - INFO - Dev MAE — Valence: 0.7848, Arousal: 0.4105
+2025-11-27 18:20:41,975 - __main__ - INFO - Dev F1 (arousal): 0.6240
+2025-11-27 18:20:41,976 - __main__ - INFO - Dev F1 (valence): 0.3999
+2025-11-27 18:20:41,978 - __main__ - INFO - Dev Accuracy (arousal): 0.6424
+2025-11-27 18:20:41,978 - __main__ - INFO - Dev Accuracy (valence): 0.4700
+2025-11-27 18:20:41,983 - __main__ - INFO - Dev Precision (arousal): 0.6218
+2025-11-27 18:20:41,983 - __main__ - INFO - Dev Precision (valence): 0.4235
+2025-11-27 18:20:41,989 - __main__ - INFO - Dev Recall (arousal): 0.6424
+2025-11-27 18:20:41,989 - __main__ - INFO - Dev Recall (valence): 0.6424
+2025-11-27 18:20:41,991 - __main__ - INFO - 	Epoch:4/5	batch:0/139
+2025-11-27 18:22:03,319 - __main__ - INFO - 	Epoch:4/5	batch:10/139
+2025-11-27 18:23:29,039 - __main__ - INFO - 	Epoch:4/5	batch:20/139
+2025-11-27 18:24:41,141 - __main__ - INFO - 	Epoch:4/5	batch:30/139
+2025-11-27 18:25:54,787 - __main__ - INFO - 	Epoch:4/5	batch:40/139
+2025-11-27 18:27:17,431 - __main__ - INFO - 	Epoch:4/5	batch:50/139
+2025-11-27 18:28:35,123 - __main__ - INFO - 	Epoch:4/5	batch:60/139
+2025-11-27 18:30:34,588 - __main__ - INFO - 	Epoch:4/5	batch:70/139
+2025-11-27 18:31:36,366 - __main__ - INFO - 	Epoch:4/5	batch:80/139
+2025-11-27 18:32:31,324 - __main__ - INFO - 	Epoch:4/5	batch:90/139
+2025-11-27 18:33:47,196 - __main__ - INFO - 	Epoch:4/5	batch:100/139
+2025-11-27 18:35:00,373 - __main__ - INFO - 	Epoch:4/5	batch:110/139
+2025-11-27 18:36:20,841 - __main__ - INFO - 	Epoch:4/5	batch:120/139
+2025-11-27 18:38:16,399 - __main__ - INFO - 	Epoch:4/5	batch:130/139
+2025-11-27 18:39:26,824 - __main__ - INFO - Epoch 4/5 average train loss: 0.5014
+2025-11-27 18:40:57,586 - __main__ - INFO - Valence predictions: tensor([2, 2, 4, 0, 3, 4, 2, 0, 4, 1, 2, 4, 2, 0, 0, 0, 1, 2, 4, 4, 1, 2, 0, 1,
+        4, 4, 2, 2, 4, 2, 3, 2, 0, 4, 4, 4, 1, 4, 3, 2, 2, 0, 4, 2, 2, 4, 2, 2,
+        2, 1, 2, 4, 0, 2, 1])
+2025-11-27 18:40:57,587 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2, 2, 3, 2, 2, 4, 0, 3, 4, 3, 0, 2, 4, 3, 3, 1, 4, 4, 4, 4, 3, 2,
+        2, 1, 2, 4, 0, 2, 1])
+2025-11-27 18:40:57,587 - __main__ - INFO - Arousal predictions: tensor([1, 2, 2, 1, 0, 1, 2, 2, 0, 0, 1, 0, 2, 1, 1, 0, 0, 2, 1, 2, 1, 1, 0, 2,
+        2, 1, 1, 1, 0, 2, 0, 2, 0, 1, 0, 1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 2, 2, 2,
+        2, 1, 1, 1, 0, 1, 1])
+2025-11-27 18:40:57,588 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0, 1, 0, 1, 1, 2, 0, 1, 0, 2, 2, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 2,
+        1, 1, 1, 1, 0, 1, 1])
+2025-11-27 18:40:57,592 - __main__ - INFO - Dev MAE — Valence: 0.7125, Arousal: 0.4250
+2025-11-27 18:40:57,624 - __main__ - INFO - Dev F1 (arousal): 0.6212
+2025-11-27 18:40:57,624 - __main__ - INFO - Dev F1 (valence): 0.4194
+2025-11-27 18:40:57,627 - __main__ - INFO - Dev Accuracy (arousal): 0.6470
+2025-11-27 18:40:57,627 - __main__ - INFO - Dev Accuracy (valence): 0.4602
+2025-11-27 18:40:57,630 - __main__ - INFO - Dev Precision (arousal): 0.6172
+2025-11-27 18:40:57,630 - __main__ - INFO - Dev Precision (valence): 0.4160
+2025-11-27 18:40:57,632 - __main__ - INFO - Dev Recall (arousal): 0.6470
+2025-11-27 18:40:57,632 - __main__ - INFO - Dev Recall (valence): 0.6470
+2025-11-27 18:40:57,634 - __main__ - INFO - 	Epoch:5/5	batch:0/139
+2025-11-27 18:42:18,126 - __main__ - INFO - 	Epoch:5/5	batch:10/139
+2025-11-27 18:43:43,649 - __main__ - INFO - 	Epoch:5/5	batch:20/139
+2025-11-27 18:44:55,264 - __main__ - INFO - 	Epoch:5/5	batch:30/139
+2025-11-27 18:46:10,036 - __main__ - INFO - 	Epoch:5/5	batch:40/139
+2025-11-27 18:47:35,510 - __main__ - INFO - 	Epoch:5/5	batch:50/139
+2025-11-27 18:48:54,945 - __main__ - INFO - 	Epoch:5/5	batch:60/139
+2025-11-27 18:50:54,693 - __main__ - INFO - 	Epoch:5/5	batch:70/139
+2025-11-27 18:51:57,102 - __main__ - INFO - 	Epoch:5/5	batch:80/139
+2025-11-27 18:52:50,804 - __main__ - INFO - 	Epoch:5/5	batch:90/139
+2025-11-27 18:54:07,555 - __main__ - INFO - 	Epoch:5/5	batch:100/139
+2025-11-27 18:55:20,115 - __main__ - INFO - 	Epoch:5/5	batch:110/139
+2025-11-27 18:56:41,083 - __main__ - INFO - 	Epoch:5/5	batch:120/139
+2025-11-27 18:58:34,502 - __main__ - INFO - 	Epoch:5/5	batch:130/139
+2025-11-27 18:59:44,707 - __main__ - INFO - Epoch 5/5 average train loss: 0.4158
+2025-11-27 19:01:15,665 - __main__ - INFO - Valence predictions: tensor([2, 2, 4, 0, 2, 4, 2, 0, 4, 2, 2, 4, 2, 2, 0, 1, 1, 2, 4, 4, 2, 2, 1, 0,
+        4, 4, 2, 2, 4, 2, 2, 2, 0, 4, 4, 4, 0, 4, 4, 2, 2, 0, 4, 2, 2, 4, 4, 2,
+        2, 1, 2, 4, 0, 2, 0])
+2025-11-27 19:01:15,666 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2, 2, 3, 2, 2, 4, 0, 3, 4, 3, 0, 2, 4, 3, 3, 1, 4, 4, 4, 4, 3, 2,
+        2, 1, 2, 4, 0, 2, 1])
+2025-11-27 19:01:15,667 - __main__ - INFO - Arousal predictions: tensor([0, 2, 2, 1, 2, 1, 2, 2, 0, 0, 1, 0, 0, 1, 1, 0, 0, 2, 1, 2, 1, 1, 0, 2,
+        2, 1, 2, 1, 0, 2, 0, 2, 0, 1, 0, 2, 2, 2, 0, 0, 2, 0, 0, 0, 1, 2, 2, 2,
+        2, 1, 2, 2, 0, 1, 1])
+2025-11-27 19:01:15,667 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0, 1, 0, 1, 1, 2, 0, 1, 0, 2, 2, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 2,
+        1, 1, 1, 1, 0, 1, 1])
+2025-11-27 19:01:15,672 - __main__ - INFO - Dev MAE — Valence: 0.7251, Arousal: 0.4973
+2025-11-27 19:01:15,699 - __main__ - INFO - Dev F1 (arousal): 0.5774
+2025-11-27 19:01:15,699 - __main__ - INFO - Dev F1 (valence): 0.4190
+2025-11-27 19:01:15,701 - __main__ - INFO - Dev Accuracy (arousal): 0.6184
+2025-11-27 19:01:15,701 - __main__ - INFO - Dev Accuracy (valence): 0.4700
+2025-11-27 19:01:15,704 - __main__ - INFO - Dev Precision (arousal): 0.5890
+2025-11-27 19:01:15,704 - __main__ - INFO - Dev Precision (valence): 0.4545
+2025-11-27 19:01:15,706 - __main__ - INFO - Dev Recall (arousal): 0.6184
+2025-11-27 19:01:15,706 - __main__ - INFO - Dev Recall (valence): 0.6184
+2025-11-27 19:01:15,752 - __main__ - INFO - Saved model and bin metadata to: /home/trar3243/PrimaryDocuments/MS-CLASIC/2025-fall/CSCI-5832_natural-language-processing/finalProject/Semeval2026Group8Temp/Semeval2026Group8/Artifacts/arousal_head.pt
+EntryList has following distribution:
+	valence:Counter({2.0: 892, 4: 588, 3.0: 538, 1.0: 377, 0: 369})
+	arousal:Counter({0: 1215, 1.0: 1022, 2: 527})
