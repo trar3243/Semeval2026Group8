@@ -11,7 +11,7 @@ from ClassDefinition.Utils import Logger, ArgumentParser
 from ClassDefinition.Entry import Entry
 from ClassDefinition.Roberta import Roberta
 from ClassDefinition.Dataset import Dataset, Batch
-from ClassDefinition.ArousalClassifier import ArousalClassifier, AffectClassifier
+from ClassDefinition.AffectClassifier import AffectClassifier
 from losses import build_criterion, compute_single_task_loss
 
 required_arguments = []
@@ -77,9 +77,11 @@ def trainingLoop(
             batch = train_batch_list[j]
 
             # all CLS embeddings of each entry in batch
-            features = batch.getFeatures()  # [B, 768]
+            cls_embeddings = batch.getClsEmbeddings()  # [B, 768]
+            user_indices = batch.getUserIndices()
+            is_words = batch.getIsWords() 
 
-            # the labels for arousals for the batch
+            # the labels for for the batch
             arousalLabels = batch.arousalLabelList  # [B] long
             valenceLabels = batch.valenceLabelList  # [B] long
             labels = torch.stack([valenceLabels, arousalLabels], dim=1)
@@ -87,7 +89,7 @@ def trainingLoop(
             optimizer.zero_grad()
 
             # get predictions of the model
-            predictions = model(features)  # [B, 2]
+            predictions = model(cls_embeddings, user_indices, is_words)  # [B, 2]
                 
             valence_prediction = predictions[:,0]
             arousal_prediction = predictions[:,1]
@@ -135,8 +137,10 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     valence_labels=[]
     with torch.no_grad():
         for dev_batch in dataset.getDevBatchList():
-            features = dev_batch.getFeatures()
-            predictions = model(features) # [B, 2]
+            cls_embeddings = dev_batch.getClsEmbeddings()
+            user_indices = dev_batch.getUserIndices()
+            is_words = dev_batch.getIsWords()
+            predictions = model(cls_embeddings, user_indices, is_words) # [B, 2]
 
             valence_predictions_binned = torch.round(predictions[:,0] * 4)
             arousal_predictions_binned = torch.round(predictions[:,1] * 2)
@@ -193,7 +197,7 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     Combined_Predictions = (arousal_predictions.long() * 5) + valence_predictions.long()
     Combined_Labels = (arousal_labels.long() * 5) + valence_labels.long() 
     #Calculate F1 from combined labels, predictions
-    CombinedF1  = F1(task='multiclass', num_classes=15, average='macro')(Combined_Predictions, Combined_Labels)
+    CombinedF1  = F1Score(task='multiclass', num_classes=15, average='macro')(Combined_Predictions, Combined_Labels)
     print(f"Combined F1: {CombinedF1:.4f}")
     
     return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1)
@@ -241,30 +245,19 @@ def main(inputArguments):
     # 2. Load training CSV data (train_subtask1.csv)
     #   - required columns: user_id, text, valence (float in [-2,2]), arousal (float in [0,2])
     #   - drop NaNs, basic whitespace cleanup
-    from data_ingest import ingest
-
-    entries = ingest(g_ArgParse.get("dataPath"))
-    print(f"{len(entries)} entries ingested")
-
+    roberta = Roberta()            # create only once
+    dataset = Dataset(g_ArgParse.get("dataPath"), roberta)
+    dataset.printSetDistribution()
     # 3. Define bins for classification labels:
     #    - Valence: 5 bins over [-2, 2] -> class ids {0..4}
     #    - Arousal: 3 bins over [ 0, 2] -> class ids {0..2}
-    for e in entries:
-        # Compute class ids for valence and arousal and update the Entry object.
-        e.valence_class = float(e.valence) + 2.0
-        e.valence_class = (max(0.0, min(4.0, e.valence_class)))/4  # 0..4
-        e.arousal_class = float(e.arousal)
-        e.arousal_class = (max(0.0, min(2.0, e.arousal_class)))/2  # 0..2
-
+    
     # 4. Preprocess -> tokenize
     #   - use Hugging Face tokenizer for RoBERTa
     #   - create dataset/dataloader and return input_ids, attention_mask, y_valence_class, y_arousal_class
-    # dataset = Dataset(entries)  # splits into training and dev set
-    roberta = Roberta()            # create only once
-    dataset = Dataset(entries, roberta)
-    dataset.printSetDistribution()
+    
     # 5. Build model
-    model = AffectClassifier()
+    model = AffectClassifier(dataset.number_of_users)
 
     # 6. Loss and optimizer
     learning_rate = float(g_ArgParse.get("learningRate"))
