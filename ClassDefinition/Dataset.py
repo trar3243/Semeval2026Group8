@@ -20,20 +20,24 @@ class Batch:
         self.__init_valence_label_list__()
     
     def __init_arousal_label_list__(self):
-        self.arousalLabelList = []
-        for entry in self.entryList:
-            self.arousalLabelList.append(entry.arousal_class)
-        self.arousalLabelList = torch.tensor(self.arousalLabelList, dtype=torch.float)
+        num_classes = 3
+        arousalLabelMatrix = torch.zeros(len(self.entryList), num_classes - 1)
+        for i, entry in enumerate(self.entryList):
+            arousalLabelMatrix[i, :int(entry.arousal_class)] = 1
+        self.arousalLabelList = arousalLabelMatrix 
+
     
     def __init_valence_label_list__(self):
-        self.valenceLabelList = []
-        for entry in self.entryList:
-            self.valenceLabelList.append(entry.valence_class)
-        self.valenceLabelList = torch.tensor(self.valenceLabelList, dtype=torch.float)
+        num_classes = 5
+        valenceLabelMatrix = torch.zeros(len(self.entryList), num_classes - 1)
+        for i, entry in enumerate(self.entryList):
+            valenceLabelMatrix[i, :int(entry.valence_class)] = 1
+        self.valenceLabelList = valenceLabelMatrix 
     
     def getClsEmbeddings(self):  
         self.roberta.setTextList([e.text for e in self.entryList])
-        return self.roberta.getClsEmbedding() # b, 768 
+        return self.roberta.getClsEmbedding() # b, 768
+
     def getUserIndices(self):
         return torch.tensor([e.user_id_index for e in self.entryList], dtype=torch.long)
     def getIsWords(self):

@@ -57,7 +57,7 @@ def trainingLoop(
     dataset.setTrainBatchList(batch_size)
     train_batch_list = dataset.getTrainBatchList()
 
-    criterion = torch.nn.SmoothL1Loss() # build_criterion()
+    criterion = torch.nn.BCELoss() # build_criterion()
     number_of_batches = len(train_batch_list)
     print("Beginning training loop")
         
@@ -82,20 +82,20 @@ def trainingLoop(
             is_words = batch.getIsWords() 
 
             # the labels for for the batch
-            arousalLabels = batch.arousalLabelList  # [B] long
-            valenceLabels = batch.valenceLabelList  # [B] long
-            labels = torch.stack([valenceLabels, arousalLabels], dim=1)
+            arousalLabels = batch.arousalLabelList  # [B, 2] long
+            valenceLabels = batch.valenceLabelList  # [B, 4] long
 
             optimizer.zero_grad()
 
             # get predictions of the model
             predictions = model(cls_embeddings, user_indices, is_words)  # [B, 2]
                 
-            valence_prediction = predictions[:,0]
-            arousal_prediction = predictions[:,1]
+            valence_predictions = predictions["valence"]
+            arousal_predictions = predictions["arousal"]
+
             
-            valence_loss = criterion(valence_prediction, valenceLabels)
-            arousal_loss = criterion(arousal_prediction, arousalLabels)
+            valence_loss = criterion(valence_predictions, valenceLabels)
+            arousal_loss = criterion(arousal_predictions, arousalLabels)
 
             # get loss
             #loss, log = compute_single_task_loss(logits, arousalLabels, criterion)
@@ -142,12 +142,16 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
             is_words = dev_batch.getIsWords()
             predictions = model(cls_embeddings, user_indices, is_words) # [B, 2]
 
-            valence_predictions_binned = torch.round(predictions[:,0] * 4)
-            arousal_predictions_binned = torch.round(predictions[:,1] * 2)
-            arousal_predictions.append(arousal_predictions_binned)
-            valence_predictions.append(valence_predictions_binned)
-            valence_labels.append((dev_batch.valenceLabelList * 4))
-            arousal_labels.append((dev_batch.arousalLabelList * 2))
+            valence_prediction = predictions["valence"]
+            arousal_prediction = predictions["arousal"]
+
+            valence_prediction = (valence_prediction > 0.5).sum(dim=1)
+            arousal_prediction = (arousal_prediction > 0.5).sum(dim=1)
+            
+            valence_predictions.append(valence_prediction)
+            arousal_predictions.append(arousal_prediction)
+            valence_labels.append((dev_batch.valenceLabelList == 1).sum(dim=1))
+            arousal_labels.append((dev_batch.arousalLabelList == 1).sum(dim=1))
 
     
     arousal_predictions = torch.cat(arousal_predictions, dim=0)
@@ -160,11 +164,6 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     print(f"Valence labels     : {valence_labels[:n]}")
     print(f"Arousal predictions: {arousal_predictions[:n]}")
     print(f"Arousal labels     : {arousal_labels[:n]}")
-
-    #Separate MAE for Arousal, Valence
-    valence_mae = (valence_predictions - valence_labels).abs().mean()
-    arousal_mae = (arousal_predictions - arousal_labels).abs().mean()
-    print(f"Dev MAE — Valence: {valence_mae:.4f}, Arousal: {arousal_mae:.4f}")
 
     #Separate F1 for Arousal, Valence
     f1 = F1Score(task='multiclass',num_classes=3, average='macro')
@@ -200,7 +199,7 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     CombinedF1  = F1Score(task='multiclass', num_classes=15, average='macro')(Combined_Predictions, Combined_Labels)
     print(f"Combined F1: {CombinedF1:.4f}")
     
-    return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1)
+    return (f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1)
 
 def save_model_and_bins(model: torch.nn.Module):
     """
