@@ -9,8 +9,8 @@ class AffectClassifier(torch.nn.Module):
         super().__init__()
         self.user_embedding = torch.nn.Embedding(num_users,4) # add +1 to num users for unknown user
         self.user_embedding.weight.requires_grad = True 
-        self.input_dimension_size = Roberta.output_dimension_size + 1 + 4 # 1 is for is_words  
-        self.norm = torch.nn.LayerNorm(self.input_dimension_size) 
+        self.input_dimension_size = Roberta.output_dimension_size + 1 + 4 + 6# 1 is for is_words  
+        # self.norm = torch.nn.LayerNorm(self.input_dimension_size) 
         self.hidden_dim = self.input_dimension_size//2
         
         self.shared = torch.nn.Sequential(
@@ -27,10 +27,30 @@ class AffectClassifier(torch.nn.Module):
                 if isinstance(layer, torch.nn.Linear):
                     torch.nn.init.xavier_uniform_(layer.weight)
                     torch.nn.init.zeros_(layer.bias)
-    def forward(self, cls_embeddings: torch.Tensor, user_indices: torch.Tensor, is_word_indices: torch.Tensor):
+    def forward(self, 
+                cls_embeddings: torch.Tensor, 
+                user_indices: torch.Tensor, 
+                is_word_indices: torch.Tensor,
+                mean_lexical_valence: torch.Tensor,
+                mean_lexical_arousal: torch.Tensor,
+                count_lexical_high_valence: torch.Tensor,
+                count_lexical_low_valence: torch.Tensor,
+                count_lexical_high_arousal: torch.Tensor,
+                count_lexical_low_arousal: torch.Tensor
+    ):
         user_matrix = self.user_embedding(user_indices)
-        full_feature_matrix = torch.cat([cls_embeddings, user_matrix, is_word_indices.unsqueeze(1)], dim=1)
-        full_feature_matrix = self.norm(full_feature_matrix)
+        full_feature_matrix = torch.cat([
+            cls_embeddings, 
+            user_matrix, 
+            is_word_indices,
+            mean_lexical_valence,
+            mean_lexical_arousal,
+            count_lexical_high_valence,
+            count_lexical_low_valence,
+            count_lexical_high_arousal,
+            count_lexical_low_arousal
+        ], dim=1)
+        # full_feature_matrix = self.norm(full_feature_matrix)
         shared = self.shared(full_feature_matrix)
         arousal_classification = self.arousal_layer(shared)
         valence_classification = self.valence_layer(shared)
