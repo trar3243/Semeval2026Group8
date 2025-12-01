@@ -1,5 +1,6 @@
 import sys, os
 from collections import Counter
+import csv 
 import torch 
 import random 
 from sklearn.model_selection import train_test_split
@@ -7,6 +8,9 @@ SEMROOT = os.environ['SEMROOT']
 sys.path.append(SEMROOT)
 from ClassDefinition.Entry import Entry
 from ClassDefinition.Roberta import Roberta
+from ClassDefinition.Utils import Logger, ArgumentParser
+g_Logger = Logger(__name__)
+print = g_Logger.print
 
 class Batch:
     def __init__(self, entryList, roberta):
@@ -27,19 +31,39 @@ class Batch:
             self.valenceLabelList.append(entry.valence_class)
         self.valenceLabelList = torch.tensor(self.valenceLabelList, dtype=torch.float)
     
-    def getFeatures(self):  
+    def getClsEmbeddings(self):  
         self.roberta.setTextList([e.text for e in self.entryList])
-        extra_feature = torch.tensor([e.is_words for e in self.entryList]).unsqueeze(1) # b,1 
-        cls = self.roberta.getClsEmbedding() # b, 768 
-        return torch.cat([cls, extra_feature], dim=1) # b, 769 
+        return self.roberta.getClsEmbedding() # b, 768 
+    def getUserIndices(self):
+        return torch.tensor([e.user_id_index for e in self.entryList], dtype=torch.long)
+    def getIsWords(self):
+        return torch.tensor([e.is_words for e in self.entryList], dtype = torch.float32)
 
 
 class Dataset:
-    def __init__(self, entryList, roberta:Roberta):
+    def __init__(self, dataPath, roberta:Roberta):
+        self.__set_entry_list__(dataPath)
+        self.__set_user_indices__()
         self.roberta = roberta
-        self.trainSet, self.devSet = train_test_split(entryList, test_size=0.2, random_state=42)
+        self.trainSet, self.devSet = train_test_split(self.entryList, test_size=0.2, random_state=42)
         self.trainBatchList = None
         self.devBatchList = None
+
+    def __set_entry_list__(self, dataPath):
+        self.entryList = []
+        with open(dataPath, newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                self.entryList.append(Entry(row))
+
+    def __set_user_indices__(self):
+        user_id_list = [e.user_id for e in self.entryList]
+        user_id_distinct_ordered_list = sorted(list(set(user_id_list)))
+        self.number_of_users = len(user_id_distinct_ordered_list)
+        id_to_index = {uid:i for i,uid in enumerate(user_id_distinct_ordered_list)}
+        for entry in self.entryList:
+            entry.user_id_index = id_to_index[entry.user_id]
+            
     def shuffle(self):
         random.shuffle(self.trainSet)
     def setTrainBatchList(self,batchSize):
@@ -55,7 +79,6 @@ class Dataset:
     def getTrainBatchList(self):
         return self.trainBatchList
     def printSetDistribution(self):
-        full_set = self.trainSet + self.devSet
-        valence_class_counts = Counter(item.valence_class for item in full_set)
-        arousal_class_counts = Counter(item.arousal_class for item in full_set)
-        print(f"EntryList has following distribution:\n\tvalence:{valence_class_counts}\n\tarousal:{arousal_class_counts}") 
+        valence_class_counts = Counter(item.valence_class for item in self.entryList)
+        arousal_class_counts = Counter(item.arousal_class for item in self.entryList)
+        print(f"EntryList has {len(self.entryList)} entries, {self.number_of_users} distinct users with following label distribution:\n\tvalence:{valence_class_counts}\n\tarousal:{arousal_class_counts}")
