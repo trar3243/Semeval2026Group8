@@ -11,12 +11,13 @@ from ClassDefinition.Utils import Logger, ArgumentParser
 from ClassDefinition.Entry import Entry
 from ClassDefinition.Roberta import Roberta
 from ClassDefinition.Dataset import Dataset, Batch
-from ClassDefinition.ArousalClassifier import AffectClassifier
+from ClassDefinition.AffectClassifier import AffectClassifier, DualAffectClassifier 
 from losses import build_criterion, compute_single_task_loss
 
 required_arguments = []
 optional_arguments = {
     "dataPath": f"{SEMROOT}/Data/TRAIN_RELEASE_3SEP2025/train_subtask1.csv",
+    "lexiconLookupPath": f"{SEMROOT}/Data/Ratings_Warriner_et_al.csv",
     "numEpochs": 5,
     "batchSize": 16,
     "learningRate": 1e-3,
@@ -77,9 +78,17 @@ def trainingLoop(
             batch = train_batch_list[j]
 
             # all CLS embeddings of each entry in batch
-            features = batch.getFeatures()  # [B, 768]
+            cls_embeddings = batch.getClsEmbeddings()  # [B, 768]
+            user_indices = batch.getUserIndices()
+            is_words = batch.getIsWords()
+            mean_lexical_valence = batch.getMeanLexicalValence()
+            mean_lexical_arousal = batch.getMeanLexicalArousal()
+            count_lexical_high_valence = batch.getCountLexicalHighValence()
+            count_lexical_low_valence = batch.getCountLexicalLowValence()
+            count_lexical_high_arousal = batch.getCountLexicalHighArousal()
+            count_lexical_low_arousal = batch.getCountLexicalLowArousal()
 
-            # the labels for arousals for the batch
+            # the labels for for the batch
             arousalLabels = batch.arousalLabelList  # [B] long
             valenceLabels = batch.valenceLabelList  # [B] long
             labels = torch.stack([valenceLabels, arousalLabels], dim=1)
@@ -87,13 +96,18 @@ def trainingLoop(
             optimizer.zero_grad()
 
             # get predictions of the model
-            predictions = model(features)  # [B, 2]
+            predictions = model(cls_embeddings, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
                 
-            valence_prediction = predictions[:,0]
-            arousal_prediction = predictions[:,1]
+            valence_logits = predictions[:,0]
+            arousal_logits = predictions[:,1]
             
-            valence_loss = criterion(valence_prediction, valenceLabels)
-            arousal_loss = criterion(arousal_prediction, arousalLabels)
+            valence_loss = criterion(valence_logits, valenceLabels)
+            arousal_loss = criterion(arousal_logits, arousalLabels)
+            # update training loop to handle two heads separately
+            # valence_prediction, arousal_prediction = model(cls_embeddings, user_indices, is_words)
+
+            # valence_loss = criterion(valence_prediction, valenceLabels)
+            # arousal_loss = criterion(arousal_prediction, arousalLabels)
 
             # get loss
             #loss, log = compute_single_task_loss(logits, arousalLabels, criterion)
@@ -126,8 +140,6 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     dataset.roberta.getModel().eval()
     batch_size = int(g_ArgParse.get("batchSize"))
 
-    #bin_centers = torch.tensor([0.0, 1.0, 2.0], dtype=torch.float32)
-    
     dataset.setDevBatchList(batch_size)
     arousal_predictions = []
     valence_predictions = []
@@ -135,19 +147,32 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     valence_labels=[]
     with torch.no_grad():
         for dev_batch in dataset.getDevBatchList():
-            features = dev_batch.getFeatures()
-            predictions = model(features) # [B, 2]
+            cls_embeddings = dev_batch.getClsEmbeddings()
+            user_indices = dev_batch.getUserIndices()
+            is_words = dev_batch.getIsWords()
+            mean_lexical_valence = dev_batch.getMeanLexicalValence()
+            mean_lexical_arousal = dev_batch.getMeanLexicalArousal()
+            count_lexical_high_valence = dev_batch.getCountLexicalHighValence()
+            count_lexical_low_valence = dev_batch.getCountLexicalLowValence()
+            count_lexical_high_arousal = dev_batch.getCountLexicalHighArousal()
+            count_lexical_low_arousal = dev_batch.getCountLexicalLowArousal()
+            
+            logits = model(cls_embeddings, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
+            valence_linear = logits[:,0]
+            arousal_linear = logits[:,1]
+
             valence_predictions_binned = torch.clamp(
-                torch.round(predictions[:,0]), min=0, max=4
+                torch.round(valence_linear), min=-2, max=2
             )
             arousal_predictions_binned = torch.clamp(
-                torch.round(predictions[:,1]), min=0, max=2
+                torch.round(arousal_linear), min=-1, max=1
             )
             arousal_predictions.append(arousal_predictions_binned)
             valence_predictions.append(valence_predictions_binned)
 
             valence_labels.append(dev_batch.valenceLabelList)
             arousal_labels.append(dev_batch.arousalLabelList)
+            # val_pred, aro_pred = model(cls_embeddings, user_indices, is_words) # [B, 2]
 
     
     arousal_predictions = torch.cat(arousal_predictions, dim=0)
@@ -155,16 +180,22 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     arousal_labels = torch.cat(arousal_labels, dim=0)
     valence_labels = torch.cat(valence_labels, dim=0)
 
-    n = max(1, len(arousal_predictions) // 10)
+    n = max(1, len(arousal_predictions) // 5)
     print(f"Valence predictions: {valence_predictions[:n]}")
     print(f"Valence labels     : {valence_labels[:n]}")
     print(f"Arousal predictions: {arousal_predictions[:n]}")
     print(f"Arousal labels     : {arousal_labels[:n]}")
 
-    valence_mae = (valence_predictions - valence_labels).abs().mean()
-    arousal_mae = (arousal_predictions - arousal_labels).abs().mean()
+    valence_labels = valence_labels + 2 
+    valence_predictions = valence_predictions + 2 
+    arousal_labels = arousal_labels + 1 
+    arousal_predictions = arousal_predictions + 1 
+
+    valence_mae = (valence_predictions.float() - valence_labels.float()).abs().mean()
+    arousal_mae = (arousal_predictions.float() - arousal_labels.float()).abs().mean()
     print(f"Dev MAE — Valence: {valence_mae:.4f}, Arousal: {arousal_mae:.4f}")
 
+    #Separate F1 for Arousal, Valence
     f1 = F1Score(task='multiclass',num_classes=3, average='macro')
     f1ScoreArousal = f1(target=arousal_labels.long(), preds=arousal_predictions.long())
     f1 = F1Score(task='multiclass',num_classes=5, average='macro')
@@ -172,23 +203,33 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     print(f"Dev F1 (arousal): {f1ScoreArousal:.4f}")
     print(f"Dev F1 (valence): {f1ScoreValence:.4f}")
 
+    #Separate Accuracy for Arousal, Valence
     AccuracyArousal = Accuracy(task='multiclass', num_classes=3, average='macro')(arousal_predictions.long(), arousal_labels.long())
     AccuracyValence = Accuracy(task='multiclass', num_classes=5, average='macro')(valence_predictions.long(), valence_labels.long())
     print(f"Dev Accuracy (arousal): {AccuracyArousal:.4f}")
     print(f"Dev Accuracy (valence): {AccuracyValence:.4f}")
 
+    #Separate Precision for Arousal, Valence
     PrecisionArousal = Precision(task='multiclass', num_classes=3, average='macro')(arousal_predictions.long(), arousal_labels.long())
     PrecisionValence = Precision(task='multiclass', num_classes=5, average='macro')(valence_predictions.long(), valence_labels.long())
     print(f"Dev Precision (arousal): {PrecisionArousal:.4f}")
     print(f"Dev Precision (valence): {PrecisionValence:.4f}")
 
+    #Separate Recall for Arousal, Valence
     RecallArousal  = Recall(task='multiclass', num_classes=3, average='macro')(arousal_predictions.long(), arousal_labels.long())
     RecallValence  = Recall(task='multiclass', num_classes=5, average='macro')(valence_predictions.long(), valence_labels.long())
     print(f"Dev Recall (arousal): {RecallArousal:.4f}")
     print(f"Dev Recall (valence): {RecallArousal:.4f}")
-    
-    return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence) 
 
+    #Combined F1 for the 15 class combinations over Arousal, Valence
+    #Multiply Arousal (0.0, 1.0, 2.0) to distribute all possible combinations across unique classes (0 - 14)
+    Combined_Predictions = (arousal_predictions.long() * 5) + valence_predictions.long()
+    Combined_Labels = (arousal_labels.long() * 5) + valence_labels.long() 
+    #Calculate F1 from combined labels, predictions
+    CombinedF1  = F1Score(task='multiclass', num_classes=15, average='macro')(Combined_Predictions, Combined_Labels)
+    print(f"Combined F1: {CombinedF1:.4f}")
+    
+    return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1)
 
 def save_model_and_bins(model: torch.nn.Module):
     """
@@ -233,30 +274,19 @@ def main(inputArguments):
     # 2. Load training CSV data (train_subtask1.csv)
     #   - required columns: user_id, text, valence (float in [-2,2]), arousal (float in [0,2])
     #   - drop NaNs, basic whitespace cleanup
-    from data_ingest import ingest
-
-    entries = ingest(g_ArgParse.get("dataPath"))
-    print(f"{len(entries)} entries ingested")
-
+    roberta = Roberta()            # create only once
+    dataset = Dataset(g_ArgParse.get("dataPath"), g_ArgParse.get("lexiconLookupPath"), roberta)
+    dataset.printSetDistribution()
     # 3. Define bins for classification labels:
     #    - Valence: 5 bins over [-2, 2] -> class ids {0..4}
     #    - Arousal: 3 bins over [ 0, 2] -> class ids {0..2}
-    for e in entries:
-        # Compute class ids for valence and arousal and update the Entry object.
-        e.valence_class = float(e.valence) + 2.0
-        e.valence_class = max(0.0, min(4.0, e.valence_class))  # 0..4
-        e.arousal_class = float(e.arousal)
-        e.arousal_class = max(0.0, min(2.0, e.arousal_class))  # 0..2
-
     # 4. Preprocess -> tokenize
     #   - use Hugging Face tokenizer for RoBERTa
     #   - create dataset/dataloader and return input_ids, attention_mask, y_valence_class, y_arousal_class
-    # dataset = Dataset(entries)  # splits into training and dev set
-    roberta = Roberta()            # create only once
-    dataset = Dataset(entries, roberta)
-    dataset.printSetDistribution()
+    
     # 5. Build model
-    model = AffectClassifier(valence_mean=dataset.valence_mean, arousal_mean=dataset.arousal_mean)
+    model = AffectClassifier(dataset.number_of_users, valence_mean=dataset.valence_mean, arousal_mean=dataset.arousal_mean)
+    # model = DualAffectClassifier(dataset.number_of_users) # dual-head model version
 
     # 6. Loss and optimizer
     learning_rate = float(g_ArgParse.get("learningRate"))
