@@ -15,7 +15,7 @@ g_Logger = Logger(__name__)
 print = g_Logger.print
 
 class Batch:
-    def __init__(self, entryList, robertaA, robertaB, robertaD, robertaG):
+    def __init__(self, entryList, robertaA, robertaB, robertaD, roberta):
         self.entryList = entryList
         self.robertaA = robertaA
         self.robertaB = robertaA
