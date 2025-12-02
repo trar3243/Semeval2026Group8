@@ -92,6 +92,7 @@ def trainingLoop(
             cls_embeddingsB = batch.getClsEmbeddingsB()
             cls_embeddingsD = batch.getClsEmbeddingsD()
             cls_embeddingsG = batch.getClsEmbeddingsG()
+            cls_embeddingsH = batch.getClsEmbeddingsH()
             user_indices = batch.getUserIndices()
             is_words = batch.getIsWords()
 
@@ -111,18 +112,22 @@ def trainingLoop(
             arousalLabelsG = getOrdinalLabel(arousalLabelsD, 3)
             valenceLabelsG = getOrdinalLabel(valenceLabelsD, 5)
 
+            # Version H uses the same ordinal labels as G
+            arousalLabelsH = arousalLabelsG
+            valenceLabelsH = valenceLabelsG
+
             optimizerA.zero_grad()
             optimizerB.zero_grad()
             optimizerD.zero_grad()
             optimizerG.zero_grad()
             optimizerH.zero_grad()
 
-            # model predictions (REMOVED LEXICON)
+            # model predictions (removed lexicon)
             predictionsA = modelA(cls_embeddingsA, user_indices, is_words)
             predictionsB = modelB(cls_embeddingsB, user_indices, is_words)
             predictionsD = modelD(cls_embeddingsD, user_indices, is_words)
             predictionsG = modelG(cls_embeddingsG, user_indices, is_words)
-            predictionsH = modelH(cls_embeddingsG, user_indices, is_words)
+            predictionsH = modelH(cls_embeddingsH, user_indices, is_words)
 
             # losses
             valence_loss_A = criterionA(predictionsA["valence"], valenceLabelsA)
@@ -144,12 +149,12 @@ def trainingLoop(
             valence_loss_G = criterionG(predictionsG["valence"], valenceLabelsG)
             arousal_loss_G = criterionG(predictionsG["arousal"], arousalLabelsG)
             lossG = valence_loss_G + arousal_loss_G
-            # lossG.backward() # # Version G is frozen — compute loss only for logging (NO backward)
+            lossG.backward()
 
 
-            # Version H: same ordinal targets as G
-            valence_loss_H = criterionH(predictionsH["valence"], valenceLabelsG)
-            arousal_loss_H = criterionH(predictionsH["arousal"], arousalLabelsG)
+            # Version H: dual ordinal
+            valence_loss_H = criterionH(predictionsH["valence"], valenceLabelsH)
+            arousal_loss_H = criterionH(predictionsH["arousal"], arousalLabelsH)
             lossH = valence_loss_H + arousal_loss_H
             lossH.backward()
 
@@ -220,6 +225,7 @@ def evaluate_arousal_mae(
             cls_embeddingsB = dev_batch.getClsEmbeddingsB()
             cls_embeddingsD = dev_batch.getClsEmbeddingsD()
             cls_embeddingsG = dev_batch.getClsEmbeddingsG()
+            cls_embeddingsH = dev_batch.getClsEmbeddingsH()
             user_indices = dev_batch.getUserIndices()
             is_words = dev_batch.getIsWords()
 
@@ -227,12 +233,12 @@ def evaluate_arousal_mae(
             arousalLabels = (dev_batch.arousalLabelList + 1.0).to(torch.long)
             valenceLabels = (dev_batch.valenceLabelList + 2.0).to(torch.long)
 
-            # predictions (NO LEXICON)
+            # predictions (no lexicon)
             predictionsA = modelA(cls_embeddingsA, user_indices, is_words)
             predictionsB = modelB(cls_embeddingsB, user_indices, is_words)
             predictionsD = modelD(cls_embeddingsD, user_indices, is_words)
             predictionsG = modelG(cls_embeddingsG, user_indices, is_words)
-            predictionsH = modelH(cls_embeddingsG, user_indices, is_words)
+            predictionsH = modelH(cls_embeddingsH, user_indices, is_words)
 
             predictionsAArousal = torch.round(predictionsA["arousal"] * 2).clamp(0, 2)
             predictionsAValence = torch.round(predictionsA["valence"] * 4).clamp(0, 4)
@@ -409,11 +415,12 @@ def main(inputArguments):
     robertaB = Roberta()
     robertaD = Roberta()
     robertaG = Roberta()
+    robertaH = Roberta()
 
     dataset = Dataset(
         g_ArgParse.get("dataPath"), 
         g_ArgParse.get("lexiconLookupPath"), 
-        robertaA, robertaB, robertaD, robertaG
+        robertaA, robertaB, robertaD, robertaG, robertaH
     )
     dataset.printSetDistribution()
 
@@ -437,20 +444,15 @@ def main(inputArguments):
         {"params": modelD.parameters(), "lr": learning_rate},
         {"params": robertaD.getParameters(), "lr": 2e-5},
     ])
-    # Freeze G completely (G is reference-only now) # TODO Sierra check
-    for p in modelG.parameters():
-        p.requires_grad = False
-    for p in robertaG.getParameters():
-        p.requires_grad = False
 
     optimizerG = torch.optim.AdamW([
         {"params": modelG.parameters(), "lr": learning_rate},
+        {"params": robertaG.getParameters(), "lr": 2e-5}
     ])
 
-    # H is the only model allowed to update RobertaG
     optimizerH = torch.optim.AdamW([
         {"params": modelH.parameters(), "lr": learning_rate},
-        {"params": robertaG.getParameters(), "lr": 2e-5},
+        {"params": robertaH.getParameters(), "lr": 2e-5},  # separate encoder for H
     ])
 
     
