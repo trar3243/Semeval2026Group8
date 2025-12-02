@@ -169,8 +169,14 @@ def trainingLoop(
             #loss, log = compute_single_task_loss(logits, arousalLabels, criterion)
 
             # TODO could implement gradient clipping here (small, but helps keep training stable)
-            # torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            # torch.nn.utils.clip_grad_norm_(dataset.roberta.getParameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(modelA.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(dataset.robertaA.getParameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(modelB.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(dataset.robertaB.getParameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(modelD.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(dataset.robertaD.getParameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(modelG.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(dataset.robertaG.getParameters(), 1.0)
 
             # optimizer applies to model
             optimizerA.step()
