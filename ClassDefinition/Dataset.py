@@ -15,9 +15,12 @@ g_Logger = Logger(__name__)
 print = g_Logger.print
 
 class Batch:
-    def __init__(self, entryList, roberta):
+    def __init__(self, entryList, robertaA, robertaB, robertaD, robertaG):
         self.entryList = entryList
-        self.roberta = roberta
+        self.robertaA = robertaA
+        self.robertaB = robertaA
+        self.robertaD = robertaA
+        self.robertaG = robertaA
         self.__init_arousal_label_list__()
         self.__init_valence_label_list__()
     
@@ -25,17 +28,26 @@ class Batch:
         self.arousalLabelList = []
         for entry in self.entryList:
             self.arousalLabelList.append(entry.arousal_class)
-        self.arousalLabelList = torch.tensor(self.arousalLabelList, dtype=torch.long)
+        self.arousalLabelList = torch.tensor(self.arousalLabelList, dtype=torch.float32)
     
     def __init_valence_label_list__(self):
         self.valenceLabelList = []
         for entry in self.entryList:
             self.valenceLabelList.append(entry.valence_class)
-        self.valenceLabelList = torch.tensor(self.valenceLabelList, dtype=torch.long)
+        self.valenceLabelList = torch.tensor(self.valenceLabelList, dtype=torch.float32)
     
-    def getClsEmbeddings(self):  
-        self.roberta.setTextList([e.text for e in self.entryList])
-        return self.roberta.getClsEmbedding() # b, 768 
+    def getClsEmbeddingsA(self):  
+        self.robertaA.setTextList([e.text for e in self.entryList])
+        return self.robertaA.getClsEmbedding() # b, 768 
+    def getClsEmbeddingsB(self):  
+        self.robertaB.setTextList([e.text for e in self.entryList])
+        return self.robertaB.getClsEmbedding() # b, 768 
+    def getClsEmbeddingsD(self):  
+        self.robertaD.setTextList([e.text for e in self.entryList])
+        return self.robertaD.getClsEmbedding() # b, 768 
+    def getClsEmbeddingsG(self):  
+        self.robertaG.setTextList([e.text for e in self.entryList])
+        return self.robertaG.getClsEmbedding() # b, 768 
     def getUserIndices(self):
         return torch.tensor([e.user_id_index for e in self.entryList], dtype=torch.long)
     def getIsWords(self):
@@ -78,11 +90,18 @@ class LexicalValenceArousal:
         
 
 class Dataset:
-    def __init__(self, dataPath, lexiconLookupPath, roberta:Roberta):
+    def __init__(
+        self, 
+        dataPath, lexiconLookupPath, 
+        robertaA, robertaB, robertaD, robertaG
+    ):
         self.__set_entry_list__(dataPath)
         self.__set_user_indices__()
         self.__set_valence_arousal_lexicon_features__(lexiconLookupPath)
-        self.roberta = roberta
+        self.robertaA = robertaA
+        self.robertaB = robertaB
+        self.robertaD = robertaD
+        self.robertaG = robertaG
         self.trainSet, self.devSet = train_test_split(self.entryList, test_size=0.2, random_state=42)
         self.trainBatchList = None
         self.devBatchList = None
@@ -151,11 +170,6 @@ class Dataset:
             entry.count_lexical_low_valence = (entry.count_lexical_low_valence - total_mean_count_lexical_low_valence)/ total_std_count_lexical_low_valence 
             entry.count_lexical_high_arousal = (entry.count_lexical_high_arousal - total_mean_count_lexical_high_arousal)/ total_std_count_lexical_high_arousal 
             entry.count_lexical_low_arousal = (entry.count_lexical_low_arousal -  total_mean_count_lexical_low_arousal)/ total_std_count_lexical_low_arousal 
-            
-
-
-                
-
     def __set_user_indices__(self):
         user_id_list = [e.user_id for e in self.entryList]
         user_id_distinct_ordered_list = sorted(list(set(user_id_list)))
@@ -169,11 +183,11 @@ class Dataset:
     def setTrainBatchList(self,batchSize):
         self.trainBatchList = []
         for i in range(0, len(self.trainSet), batchSize):
-            self.trainBatchList.append(Batch(self.trainSet[i:i+batchSize], self.roberta))
+            self.trainBatchList.append(Batch(self.trainSet[i:i+batchSize], self.robertaA, self.robertaB, self.robertaD, self.robertaG))
     def setDevBatchList(self,batchSize):
         self.devBatchList = [] 
         for i in range(0, len(self.devSet), batchSize):
-            self.devBatchList.append(Batch(self.devSet[i:i+batchSize], self.roberta))
+            self.devBatchList.append(Batch(self.devSet[i:i+batchSize], self.robertaA, self.robertaB, self.robertaD, self.robertaG))
     def getDevBatchList(self):
         return self.devBatchList
     def getTrainBatchList(self):

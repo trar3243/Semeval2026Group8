@@ -26,13 +26,13 @@ class Entry:
         self.__set_valence_class__()
         self.__set_arousal_class__()
     def __set_valence_class__(self):
-        valence_class = self.valence + 2.0 # 0,...,4
-        valence_class = max(0.0, min(4.0, valence_class))
-        self.valence_class = int(valence_class)# 0,...,4
+        valence_class = self.valence # -2,...,2
+        valence_class = max(-2.0, min(2.0, valence_class))
+        self.valence_class = valence_class# -2,...,2
     def __set_arousal_class__(self):
-        arousal_class = self.arousal # 0,...,2
-        arousal_class = max(0.0, min(2.0, arousal_class))
-        self.arousal_class = int(arousal_class)# 0,...,2
+        arousal_class = self.arousal - 1.0 # -1,...,1
+        arousal_class = max(-1.0, min(1.0, arousal_class))
+        self.arousal_class = arousal_class# 0,...,2
     def __repr__(self):
         return (
             f"Entry(user_id={self.user_id}, text_id={self.text_id}, text={self.text}, timestamp={self.timestamp}, collection_phase={self.collection_phase}, is_words={self.is_words}, valence={self.valence}, arousal={self.arousal}, valence_class={self.valence_class}, arousal_class={self.arousal_class}, mean_lexical_valence={self.mean_lexical_valence},count_lexical_high_valence={self.count_lexical_high_valence},count_lexical_low_valence={self.count_lexical_low_valence},mean_lexical_arousal={self.mean_lexical_arousal},count_lexical_high_arousal={self.count_lexical_high_arousal},count_lexical_low_arousal={self.count_lexical_low_arousal},)")
