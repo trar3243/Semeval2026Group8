@@ -222,8 +222,16 @@ def evaluate_arousal_mae(
     arousal_labels=[]
     valence_labels=[]
 
-    valence_predictions_continuous = []
+    arousal_predictions_continuous_A = []
+    valence_predictions_continuous_A = []
+    arousal_predictions_continuous_B = []
+    valence_predictions_continuous_B = []
+    arousal_predictions_continuous_D = []
+    valence_predictions_continuous_D = []
+    arousal_predictions_continuous_G = []
+    valence_predictions_continuous_G = []
     arousal_predictions_continuous = []
+    valence_predictions_continuous = []
     
     with torch.no_grad():
         for dev_batch in dataset.getDevBatchList():
@@ -238,27 +246,17 @@ def evaluate_arousal_mae(
             arousalLabels = (dev_batch.arousalLabelList + 1.0).to(torch.long) # [B] long 0,...,2
             valenceLabels = (dev_batch.valenceLabelList + 2.0).to(torch.long) # [B] long 0,...,4
             
-            """arousalLabelsA = (arousalLabels + 1)/2 # #0,...,1
-            valenceLabelsA = (valenceLabels + 2)/4
-            
-            arousalLabelsB = arousalLabels# #0,...,1
-            valenceLabelsB = valenceLabels
-            
-            arousalLabelsD = (arousalLabels + 1).to(torch.long) # 0,...,2
-            valenceLabelsD = (valenceLabels + 2).to(torch.long) # 0,...,4
-            
-            arousalLabelsG = getOrdinalLabel(arousalLabelsD, 3)
-            valenceLabelsG = getOrdinalLabel(valenceLabelsD, 5)"""
-
 
             # get predictions of the model
             predictionsA = modelA(cls_embeddingsA, user_indices, is_words)  # [B, 2]
             predictionsB = modelB(cls_embeddingsB, user_indices, is_words) # [B, 2]
             predictionsD = modelD(cls_embeddingsD, user_indices, is_words) # [B, 2]
-            predictionsG = modelG(cls_embeddingsG, user_indices, is_words)# [B, 2]
+            predictionsG = modelG(cls_embeddingsG, user_indices, is_words) # [B, 2]
             
             predictionsAArousal = torch.round(predictionsA["arousal"] * 2)
             predictionsAValence = torch.round(predictionsA["valence"] * 4)
+            predictionsAArousalCont = predictionsA["arousal"] * 2
+            predictionsAValenceCont = predictionsA["valence"] * 4
 
             predictionsBArousal = torch.round(
                 torch.clamp(predictionsB["arousal"] + 1,
@@ -268,19 +266,20 @@ def evaluate_arousal_mae(
                 torch.clamp(predictionsB["valence"] + 2,
                 min=0, max=4)
             )
+            predictionsBArousalCont = torch.clamp(predictionsB["arousal"] + 1,min=0.0, max=2.0)
+            predictionsBValenceCont = torch.clamp(predictionsB["valence"] + 2,min=0.0, max=4.0)
 
             predictionsDArousal = predictionsD["arousal"].argmax(dim=-1)
             predictionsDValence = predictionsD["valence"].argmax(dim=-1)
+            predictionsDArousalCont = predictionsD["arousal"].argmax(dim=-1).to(torch.float32)
+            predictionsDValenceCont = predictionsD["valence"].argmax(dim=-1).to(torch.float32)
 
             predictionsGArousal = (torch.sigmoid(predictionsG["arousal"]) > 0.5).sum(dim=1)
             predictionsGValence = (torch.sigmoid(predictionsG["valence"]) > 0.5).sum(dim=1)
+            predictionsGArousalCont = (torch.sigmoid(predictionsG["arousal"]) > 0.5).sum(dim=1)
+            predictionsGValenceCont = (torch.sigmoid(predictionsG["valence"]) > 0.5).sum(dim=1)
+            
 
-            arousalVotes = torch.stack([
-                predictionsAArousal.to(torch.long),
-                predictionsBArousal.to(torch.long),
-                predictionsDArousal.to(torch.long),
-                predictionsGArousal.to(torch.long)], dim=0
-            )
             arousal_predictions_A.append(predictionsAArousal.to(torch.long))
             valence_predictions_A.append(predictionsAValence.to(torch.long))
             arousal_predictions_B.append(predictionsBArousal.to(torch.long))
@@ -289,26 +288,55 @@ def evaluate_arousal_mae(
             valence_predictions_D.append(predictionsDValence.to(torch.long))
             arousal_predictions_G.append(predictionsGArousal.to(torch.long))
             valence_predictions_G.append(predictionsGValence.to(torch.long))
+            
+            arousal_predictions_continuous_A.append(predictionsAArousalCont.to(torch.float32))
+            valence_predictions_continuous_A.append(predictionsAValenceCont.to(torch.float32))
+            arousal_predictions_continuous_B.append(predictionsBArousalCont.to(torch.float32))
+            valence_predictions_continuous_B.append(predictionsBValenceCont.to(torch.float32))
+            arousal_predictions_continuous_D.append(predictionsDArousalCont.to(torch.float32))
+            valence_predictions_continuous_D.append(predictionsDValenceCont.to(torch.float32))
+            arousal_predictions_continuous_G.append(predictionsGArousalCont.to(torch.float32))
+            valence_predictions_continuous_G.append(predictionsGValenceCont.to(torch.float32))
+
+            arousalVotes = torch.stack([
+                predictionsAArousal.to(torch.long),
+                predictionsBArousal.to(torch.long),
+                predictionsDArousal.to(torch.long),
+                predictionsGArousal.to(torch.long)], dim=0
+            )
             valenceVotes = torch.stack([
                 predictionsAValence.to(torch.long),
                 predictionsBValence.to(torch.long),
                 predictionsDValence.to(torch.long),
                 predictionsGValence.to(torch.long)], dim=0
             )
+            arousalVotesCont = torch.stack([
+                predictionsAArousalCont.to(torch.float32),
+                predictionsBArousalCont.to(torch.float32),
+                predictionsDArousalCont.to(torch.float32),
+                predictionsGArousalCont.to(torch.float32)], dim=0
+            )
+            valenceVotesCont = torch.stack([
+                predictionsAValenceCont.to(torch.float32),
+                predictionsBValenceCont.to(torch.float32),
+                predictionsDValenceCont.to(torch.float32),
+                predictionsGValenceCont.to(torch.float32)], dim=0
+            )
 
             arousal_predicted = torch.mode(arousalVotes, dim=0).values
             valence_predicted = torch.mode(valenceVotes, dim=0).values
+            arousal_predicted_cont = torch.mean(arousalVotesCont, dim=0)
+            valence_predicted_cont = torch.mean(valenceVotesCont, dim=0)
 
             arousal_predictions.append(arousal_predicted)
             valence_predictions.append(valence_predicted)
+            arousal_predictions_continuous.append(arousal_predicted_cont)
+            valence_predictions_continuous.append(valence_predicted_cont)
 
             valence_labels.append((dev_batch.valenceLabelList + 2.0).to(torch.long))
             arousal_labels.append((dev_batch.arousalLabelList + 1.0).to(torch.long))
             # val_pred, aro_pred = model(cls_embeddings, user_indices, is_words) # [B, 2]
 
-            valence_predictions_continuous.append(val_pred)
-            arousal_predictions_continuous.append(aro_pred)
-    
     arousal_predictions = torch.cat(arousal_predictions, dim=0)
     valence_predictions = torch.cat(valence_predictions, dim=0)
     arousal_predictions_A = torch.cat(arousal_predictions_A, dim=0)
@@ -324,6 +352,14 @@ def evaluate_arousal_mae(
 
     valence_predictions_continuous = torch.cat(valence_predictions_continuous, dim=0)
     arousal_predictions_continuous = torch.cat(arousal_predictions_continuous, dim=0)
+    valence_predictions_continuous_A = torch.cat(valence_predictions_continuous_A, dim=0)
+    arousal_predictions_continuous_A = torch.cat(arousal_predictions_continuous_A, dim=0)
+    valence_predictions_continuous_B = torch.cat(valence_predictions_continuous_B, dim=0)
+    arousal_predictions_continuous_B = torch.cat(arousal_predictions_continuous_B, dim=0)
+    valence_predictions_continuous_D = torch.cat(valence_predictions_continuous_D, dim=0)
+    arousal_predictions_continuous_D = torch.cat(arousal_predictions_continuous_D, dim=0)
+    valence_predictions_continuous_G = torch.cat(valence_predictions_continuous_G, dim=0)
+    arousal_predictions_continuous_G = torch.cat(arousal_predictions_continuous_G, dim=0)
     
     n = max(1, len(arousal_predictions) // 10)
     print(f"Valence predictions: {valence_predictions[:n]}")
@@ -398,16 +434,47 @@ def evaluate_arousal_mae(
     print(f"Combined F1: {CombinedF1:.4f}")
 
     #Pearson R
-    arousal_float_predictions = arousal_predictions_continuous.float().view(-1)
     arousal_float_labels = arousal_labels.float().view(-1)
-
-    valence_float_predictions = valence_predictions_continuous.float().view(-1)
     valence_float_labels = valence_labels.float().view(-1)
-
+    
+    arousal_float_predictions = arousal_predictions_continuous.float().view(-1)
+    valence_float_predictions = valence_predictions_continuous.float().view(-1)
     pearson_arousal = torch.corrcoef(torch.stack([arousal_float_predictions,arousal_float_labels]))[0,1]
     pearson_valence = torch.corrcoef(torch.stack([valence_float_predictions,valence_float_labels]))[0,1]
     print(f"Pearson R (arousal): {pearson_arousal:.4f}")
     print(f"Pearson R (valence): {pearson_valence:.4f}")
+    
+    arousal_float_predictions = arousal_predictions_continuous_A.float().view(-1)
+    valence_float_predictions = valence_predictions_continuous_A.float().view(-1)
+    pearson_arousal = torch.corrcoef(torch.stack([arousal_float_predictions,arousal_float_labels]))[0,1]
+    pearson_valence = torch.corrcoef(torch.stack([valence_float_predictions,valence_float_labels]))[0,1]
+    print(f"Pearson R (arousal) A: {pearson_arousal:.4f}")
+    print(f"Pearson R (valence) A: {pearson_valence:.4f}")
+    
+    
+    arousal_float_predictions = arousal_predictions_continuous_B.float().view(-1)
+    valence_float_predictions = valence_predictions_continuous_B.float().view(-1)
+    pearson_arousal = torch.corrcoef(torch.stack([arousal_float_predictions,arousal_float_labels]))[0,1]
+    pearson_valence = torch.corrcoef(torch.stack([valence_float_predictions,valence_float_labels]))[0,1]
+    print(f"Pearson R (arousal) B: {pearson_arousal:.4f}")
+    print(f"Pearson R (valence) B: {pearson_valence:.4f}")
+    
+    
+    arousal_float_predictions = arousal_predictions_continuous_D.float().view(-1)
+    valence_float_predictions = valence_predictions_continuous_D.float().view(-1)
+    pearson_arousal = torch.corrcoef(torch.stack([arousal_float_predictions,arousal_float_labels]))[0,1]
+    pearson_valence = torch.corrcoef(torch.stack([valence_float_predictions,valence_float_labels]))[0,1]
+    print(f"Pearson R (arousal) D: {pearson_arousal:.4f}")
+    print(f"Pearson R (valence) D: {pearson_valence:.4f}")
+    
+    
+    arousal_float_predictions = arousal_predictions_continuous_G.float().view(-1)
+    valence_float_predictions = valence_predictions_continuous_G.float().view(-1)
+    pearson_arousal = torch.corrcoef(torch.stack([arousal_float_predictions,arousal_float_labels]))[0,1]
+    pearson_valence = torch.corrcoef(torch.stack([valence_float_predictions,valence_float_labels]))[0,1]
+    print(f"Pearson R (arousal) G: {pearson_arousal:.4f}")
+    print(f"Pearson R (valence) G: {pearson_valence:.4f}")
+    
     
     return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1, pearson_arousal, pearson_valence)
 
