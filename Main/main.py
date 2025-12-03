@@ -225,6 +225,8 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
 
     pearson_arousal = torch.corrcoef(torch.stack([arousal_float_predictions,arousal_float_labels]))[0,1]
     pearson_valence = torch.corrcoef(torch.stack([valence_float_predictions,valence_float_labels]))[0,1]
+    print(f"Pearson R (arousal): {pearson_arousal:.4f}")
+    print(f"Pearson R (valence): {pearson_valence:.4f}")
     
     return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1, pearson_arousal, pearson_valence)
 
