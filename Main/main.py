@@ -18,7 +18,7 @@ required_arguments = []
 optional_arguments = {
     "dataPath": f"{SEMROOT}/Data/TRAIN_RELEASE_3SEP2025/train_subtask1.csv",
     "lexiconLookupPath": f"{SEMROOT}/Data/Ratings_Warriner_et_al.csv",
-    "numEpochs": 5,
+    "numEpochs": 6,
     "batchSize": 16,
     "learningRate": 1e-3,
 }
@@ -102,12 +102,6 @@ def trainingLoop(
             cls_embeddingsG = batch.getClsEmbeddingsG()  # [B, 768]
             user_indices = batch.getUserIndices()
             is_words = batch.getIsWords()
-            mean_lexical_valence = batch.getMeanLexicalValence()
-            mean_lexical_arousal = batch.getMeanLexicalArousal()
-            count_lexical_high_valence = batch.getCountLexicalHighValence()
-            count_lexical_low_valence = batch.getCountLexicalLowValence()
-            count_lexical_high_arousal = batch.getCountLexicalHighArousal()
-            count_lexical_low_arousal = batch.getCountLexicalLowArousal()
 
             # the labels for for the batch
             arousalLabels = batch.arousalLabelList  # [B] float -1,...,1
@@ -132,10 +126,10 @@ def trainingLoop(
             optimizerG.zero_grad()
 
             # get predictions of the model
-            predictionsA = modelA(cls_embeddingsA, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
-            predictionsB = modelB(cls_embeddingsB, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
-            predictionsD = modelD(cls_embeddingsD, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
-            predictionsG = modelG(cls_embeddingsG, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
+            predictionsA = modelA(cls_embeddingsA, user_indices, is_words)  # [B, 2]
+            predictionsB = modelB(cls_embeddingsB, user_indices, is_words)  # [B, 2]
+            predictionsD = modelD(cls_embeddingsD, user_indices, is_words)  # [B, 2]
+            predictionsG = modelG(cls_embeddingsG, user_indices, is_words)  # [B, 2]
                 
             
             valence_loss_A = criterionA(predictionsA["valence"], valenceLabelsA)
@@ -235,12 +229,6 @@ def evaluate_arousal_mae(
             cls_embeddingsG = dev_batch.getClsEmbeddingsG()
             user_indices = dev_batch.getUserIndices()
             is_words = dev_batch.getIsWords()
-            mean_lexical_valence = dev_batch.getMeanLexicalValence()
-            mean_lexical_arousal = dev_batch.getMeanLexicalArousal()
-            count_lexical_high_valence = dev_batch.getCountLexicalHighValence()
-            count_lexical_low_valence = dev_batch.getCountLexicalLowValence()
-            count_lexical_high_arousal = dev_batch.getCountLexicalHighArousal()
-            count_lexical_low_arousal = dev_batch.getCountLexicalLowArousal()
             
             # gets messy here 
             arousalLabels = (dev_batch.arousalLabelList + 1.0).to(torch.long) # [B] long 0,...,2
@@ -260,10 +248,10 @@ def evaluate_arousal_mae(
 
 
             # get predictions of the model
-            predictionsA = modelA(cls_embeddingsA, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
-            predictionsB = modelB(cls_embeddingsB, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
-            predictionsD = modelD(cls_embeddingsD, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
-            predictionsG = modelG(cls_embeddingsG, user_indices, is_words, mean_lexical_valence, mean_lexical_arousal, count_lexical_high_valence, count_lexical_low_valence, count_lexical_high_arousal, count_lexical_low_arousal)  # [B, 2]
+            predictionsA = modelA(cls_embeddingsA, user_indices, is_words)  # [B, 2]
+            predictionsB = modelB(cls_embeddingsB, user_indices, is_words) # [B, 2]
+            predictionsD = modelD(cls_embeddingsD, user_indices, is_words) # [B, 2]
+            predictionsG = modelG(cls_embeddingsG, user_indices, is_words)# [B, 2]
             
             predictionsAArousal = torch.round(predictionsA["arousal"] * 2)
             predictionsAValence = torch.round(predictionsA["valence"] * 4)
@@ -451,7 +439,6 @@ def main(inputArguments):
     robertaG = Roberta()            # create only once
     dataset = Dataset(
         g_ArgParse.get("dataPath"), 
-        g_ArgParse.get("lexiconLookupPath"), 
         robertaA, robertaB, robertaD, robertaG
     )
     dataset.printSetDistribution()
