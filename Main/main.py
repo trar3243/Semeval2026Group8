@@ -141,6 +141,10 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     valence_predictions = []
     arousal_labels=[]
     valence_labels=[]
+
+    valence_predictions_continuous = []
+    arousal_predictions_continuous = []
+    
     with torch.no_grad():
         for dev_batch in dataset.getDevBatchList():
             cls_embeddings = dev_batch.getClsEmbeddings()
@@ -156,12 +160,17 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
             valence_labels.append((dev_batch.valenceLabelList * 4))
             arousal_labels.append((dev_batch.arousalLabelList * 2))
 
+            valence_predictions_continuous.append(val_pred)
+            arousal_predictions_continuous.append(aro_pred)
     
     arousal_predictions = torch.cat(arousal_predictions, dim=0)
     valence_predictions = torch.cat(valence_predictions, dim=0)
     arousal_labels = torch.cat(arousal_labels, dim=0)
     valence_labels = torch.cat(valence_labels, dim=0)
 
+    valence_predictions_continuous = torch.cat(valence_predictions_continuous, dim=0)
+    arousal_predictions_continuous = torch.cat(arousal_predictions_continuous, dim=0)
+    
     n = max(1, len(arousal_predictions) // 10)
     print(f"Valence predictions: {valence_predictions[:n]}")
     print(f"Valence labels     : {valence_labels[:n]}")
@@ -206,8 +215,20 @@ def evaluate_arousal_mae(model: torch.nn.Module, dataset: Dataset) -> float:
     #Calculate F1 from combined labels, predictions
     CombinedF1  = F1Score(task='multiclass', num_classes=15, average='macro')(Combined_Predictions, Combined_Labels)
     print(f"Combined F1: {CombinedF1:.4f}")
+
+    #Pearson R
+    arousal_float_predictions = arousal_predictions_continuous.float().view(-1)
+    arousal_float_labels = arousal_labels.float().view(-1)
+
+    valence_float_predictions = valence_predictions_continuous.float().view(-1)
+    valence_float_labels = valence_labels.float().view(-1)
+
+    pearson_arousal = torch.corrcoef(torch.stack([arousal_float_predictions,arousal_float_labels]))[0,1]
+    pearson_valence = torch.corrcoef(torch.stack([valence_float_predictions,valence_float_labels]))[0,1]
+    print(f"Pearson R (arousal): {pearson_arousal:.4f}")
+    print(f"Pearson R (valence): {pearson_valence:.4f}")
     
-    return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1)
+    return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1, pearson_arousal, pearson_valence)
 
 def save_model_and_bins(model: torch.nn.Module):
     """
