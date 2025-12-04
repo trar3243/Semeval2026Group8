@@ -18,9 +18,9 @@ class Batch:
     def __init__(self, entryList, robertaA, robertaB, robertaD, robertaG):
         self.entryList = entryList
         self.robertaA = robertaA
-        self.robertaB = robertaA
-        self.robertaD = robertaA
-        self.robertaG = robertaA
+        self.robertaB = robertaB
+        self.robertaD = robertaD
+        self.robertaG = robertaG
         self.__init_arousal_label_list__()
         self.__init_valence_label_list__()
     
