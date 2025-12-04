@@ -18,7 +18,7 @@ required_arguments = []
 optional_arguments = {
     "dataPath": f"{SEMROOT}/Data/TRAIN_RELEASE_3SEP2025/train_subtask1.csv",
     "lexiconLookupPath": f"{SEMROOT}/Data/Ratings_Warriner_et_al.csv",
-    "numEpochs": 6,
+    "numEpochs": 5,
     "batchSize": 16,
     "learningRate": 1e-3,
 }
@@ -271,13 +271,17 @@ def evaluate_arousal_mae(
 
             predictionsDArousal = predictionsD["arousal"].argmax(dim=-1)
             predictionsDValence = predictionsD["valence"].argmax(dim=-1)
-            predictionsDArousalCont = predictionsD["arousal"].argmax(dim=-1).to(torch.float32)
-            predictionsDValenceCont = predictionsD["valence"].argmax(dim=-1).to(torch.float32)
+            predictionsDArousalProb = torch.softmax(predictionsD["arousal"], dim=-1)
+            predictionsDValenceProb = torch.softmax(predictionsD["valence"], dim=-1)
+            arousal_classes = torch.arange(3, device=predictionsDArousalProb.device).float()
+            valence_classes = torch.arange(5, device=predictionsDArousalProb.device).float()
+            predictionsDArousalCont = (predictionsDArousalProb * arousal_classes).sum(dim=-1) # weighted sums 
+            predictionsDValenceCont = (predictionsDValenceProb * valence_classes).sum(dim=-1)
 
             predictionsGArousal = (torch.sigmoid(predictionsG["arousal"]) > 0.5).sum(dim=1)
             predictionsGValence = (torch.sigmoid(predictionsG["valence"]) > 0.5).sum(dim=1)
-            predictionsGArousalCont = (torch.sigmoid(predictionsG["arousal"]) > 0.5).sum(dim=1)
-            predictionsGValenceCont = (torch.sigmoid(predictionsG["valence"]) > 0.5).sum(dim=1)
+            predictionsGArousalCont = (torch.sigmoid(predictionsG["arousal"])).sum(dim=1) # sum of the probabilities 
+            predictionsGValenceCont = (torch.sigmoid(predictionsG["valence"])).sum(dim=1)
             
 
             arousal_predictions_A.append(predictionsAArousal.to(torch.long))

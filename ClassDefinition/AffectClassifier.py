@@ -145,7 +145,7 @@ class VersionGAffectClassifier(torch.nn.Module):
         self.shared = torch.nn.Sequential(
             torch.nn.Linear(self.input_dimension_size, self.hidden_dim), # CLS embeddings to hidden layer 
             torch.nn.GELU(), # apply a GELU to hidden (read that this works well with RoBerta)
-            torch.nn.Dropout(0.1), # 10% of the hidden layer nodes are dropped 
+            torch.nn.Dropout(0.1), # 30% of the hidden layer nodes are dropped 
         )
         self.arousal_layer = torch.nn.Linear(self.hidden_dim, 2) 
         self.valence_layer = torch.nn.Linear(self.hidden_dim, 4) 
