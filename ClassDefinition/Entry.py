@@ -16,13 +16,6 @@ class Entry:
         self.arousal = float(row.get('arousal')) # 0,...,2
         self.user_id_index = None # gets assigned in the Dataset class 
         
-        self.mean_lexical_valence = None
-        self.mean_lexical_arousal = None
-        self.count_lexical_high_valence = None
-        self.count_lexical_low_valence = None
-        self.count_lexical_high_arousal = None
-        self.count_lexical_low_arousal = None
-
         self.__set_valence_class__()
         self.__set_arousal_class__()
     def __set_valence_class__(self):
@@ -35,4 +28,4 @@ class Entry:
         self.arousal_class = arousal_class# 0,...,2
     def __repr__(self):
         return (
-            f"Entry(user_id={self.user_id}, text_id={self.text_id}, text={self.text}, timestamp={self.timestamp}, collection_phase={self.collection_phase}, is_words={self.is_words}, valence={self.valence}, arousal={self.arousal}, valence_class={self.valence_class}, arousal_class={self.arousal_class}, mean_lexical_valence={self.mean_lexical_valence},count_lexical_high_valence={self.count_lexical_high_valence},count_lexical_low_valence={self.count_lexical_low_valence},mean_lexical_arousal={self.mean_lexical_arousal},count_lexical_high_arousal={self.count_lexical_high_arousal},count_lexical_low_arousal={self.count_lexical_low_arousal},)")
+            f"Entry(user_id={self.user_id}, text_id={self.text_id}, text={self.text}, timestamp={self.timestamp}, collection_phase={self.collection_phase}, is_words={self.is_words}, valence={self.valence}, arousal={self.arousal}, valence_class={self.valence_class}, arousal_class={self.arousal_class})")

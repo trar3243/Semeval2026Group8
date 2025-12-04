@@ -150,16 +150,14 @@ class VersionGAffectClassifier(torch.nn.Module):
         super().__init__()
         self.user_embedding = torch.nn.Embedding(num_users,4)
         self.user_embedding.weight.requires_grad = True 
-        
-        # REMOVE LEXICON
         self.input_dimension_size = Roberta.output_dimension_size + 1 + 4
         
         self.hidden_dim = self.input_dimension_size//2
         
         self.shared = torch.nn.Sequential(
-            torch.nn.Linear(self.input_dimension_size, self.hidden_dim), 
-            torch.nn.GELU(), 
-            torch.nn.Dropout(0.1), 
+            torch.nn.Linear(self.input_dimension_size, self.hidden_dim), # CLS embeddings to hidden layer 
+            torch.nn.GELU(), # apply a GELU to hidden (read that this works well with RoBerta)
+            torch.nn.Dropout(0.1), # 30% of the hidden layer nodes are dropped 
         )
         self.arousal_layer = torch.nn.Linear(self.hidden_dim, 2) 
         self.valence_layer = torch.nn.Linear(self.hidden_dim, 4) 
