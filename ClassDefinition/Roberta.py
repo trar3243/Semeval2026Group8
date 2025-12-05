@@ -27,10 +27,10 @@ class Roberta:
         model_name = "roberta-base"  
         self.__tokenizer = RobertaTokenizer.from_pretrained(model_name)
         self.__model = RobertaModel.from_pretrained(model_name) 
-        # for name, param in self.__model.named_parameters():
-        #    param.requires_grad = False
-        #    if "layer.11" in name or "layer.10" in name:   # Only train the last two layers 
-        #        param.requires_grad = True
+        for name, param in self.__model.named_parameters():
+            param.requires_grad = False
+            if "layer.11" in name or "layer.10" in name:   # Only train the last two layers 
+                param.requires_grad = True
     def getTokenizer(self):
         return self.__tokenizer
     def getModel(self):
