@@ -53,20 +53,6 @@ class Batch:
     def getIsWords(self):
         return torch.tensor([e.is_words for e in self.entryList], dtype = torch.float32).unsqueeze(1)
     
-    def getMeanLexicalValence(self):
-        return torch.tensor([e.mean_lexical_valence for e in self.entryList], dtype = torch.float32).unsqueeze(1)
-    def getMeanLexicalArousal(self):
-        return torch.tensor([e.mean_lexical_arousal for e in self.entryList], dtype = torch.float32).unsqueeze(1)
-    def getCountLexicalHighValence(self):
-        return torch.tensor([e.count_lexical_high_valence for e in self.entryList], dtype = torch.float32).unsqueeze(1)
-    def getCountLexicalLowValence(self):
-        return torch.tensor([e.count_lexical_low_valence for e in self.entryList], dtype = torch.float32).unsqueeze(1)
-    def getCountLexicalHighArousal(self):
-        return torch.tensor([e.count_lexical_high_arousal for e in self.entryList], dtype = torch.float32).unsqueeze(1)
-    def getCountLexicalLowArousal(self):
-        return torch.tensor([e.count_lexical_low_arousal for e in self.entryList], dtype = torch.float32).unsqueeze(1)
-        
-        
 
 
 class Dataset:

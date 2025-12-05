@@ -17,7 +17,6 @@ from losses import build_criterion, compute_single_task_loss
 required_arguments = []
 optional_arguments = {
     "dataPath": f"{SEMROOT}/Data/TRAIN_RELEASE_3SEP2025/train_subtask1.csv",
-    "lexiconLookupPath": f"{SEMROOT}/Data/Ratings_Warriner_et_al.csv",
     "numEpochs": 5,
     "batchSize": 16,
     "learningRate": 1e-3,
