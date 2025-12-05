@@ -1,0 +1,317 @@
+2025-12-04 08:00:45,528 - __main__ - INFO - ScriptName: C:\Users\Troyb\cygwin\Troyb\repos\SemevalSecondary\Semeval2026Group8\Main\main.py
+2025-12-04 08:00:45,528 - ClassDefinition.Utils - INFO - Optional argument dataPath not found in input. Continuing...
+2025-12-04 08:00:45,528 - ClassDefinition.Utils - INFO - Optional argument lexiconLookupPath not found in input. Continuing...
+2025-12-04 08:00:45,528 - ClassDefinition.Utils - INFO - Optional argument numEpochs not found in input. Continuing...
+2025-12-04 08:00:45,528 - ClassDefinition.Utils - INFO - Optional argument batchSize not found in input. Continuing...
+2025-12-04 08:00:45,528 - ClassDefinition.Utils - INFO - Optional argument learningRate not found in input. Continuing...
+2025-12-04 08:00:45,528 - ClassDefinition.Utils - INFO -        Key:dataPath    Value:C:/Users/Troyb/cygwin/Troyb/repos/SemevalSecondary/Semeval2026Group8/Data/TRAIN_RELEASE_3SEP2025/train_subtask1.csv
+2025-12-04 08:00:45,528 - ClassDefinition.Utils - INFO -        Key:lexiconLookupPath   Value:C:/Users/Troyb/cygwin/Troyb/repos/SemevalSecondary/Semeval2026Group8/Data/Ratings_Warriner_et_al.csv
+2025-12-04 08:00:45,528 - ClassDefinition.Utils - INFO -        Key:numEpochs   Value:5
+2025-12-04 08:00:45,528 - ClassDefinition.Utils - INFO -        Key:batchSize   Value:16
+2025-12-04 08:00:45,528 - ClassDefinition.Utils - INFO -        Key:learningRate        Value:0.001
+2025-12-04 08:00:48,739 - ClassDefinition.Dataset - INFO - EntryList has 2764 entries, 137 distinct users with following label distribution:
+        valence:Counter({0.0: 892, 2.0: 588, 1.0: 538, -1.0: 377, -2.0: 369})
+        arousal:Counter({-1.0: 1215, 0.0: 1022, 1.0: 527})
+2025-12-04 08:00:48,755 - __main__ - INFO - Beginning training loop
+2025-12-04 08:02:02,856 - __main__ - INFO - Valence predictions: tensor([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2])
+2025-12-04 08:02:02,856 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2])
+2025-12-04 08:02:02,856 - __main__ - INFO - Arousal predictions: tensor([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1])
+2025-12-04 08:02:02,856 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0])
+2025-12-04 08:02:02,856 - __main__ - INFO - Dev MAE ▒ Valence: 1.0361, Arousal: 0.6065
+2025-12-04 08:02:02,856 - __main__ - INFO - Dev F1 (arousal): 0.1883
+2025-12-04 08:02:02,856 - __main__ - INFO - Dev F1 (valence): 0.0964
+2025-12-04 08:02:02,856 - __main__ - INFO - Dev F1 A (arousal): 0.1883
+2025-12-04 08:02:02,856 - __main__ - INFO - Dev F1 A (valence): 0.0964
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev F1 B (arousal): 0.2241
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev F1 B (valence): 0.0964
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev F1 D (arousal): 0.1949
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev F1 D (valence): 0.0677
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev F1 G (arousal): 0.2018
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev F1 G (valence): 0.0967
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev Accuracy (arousal): 0.3333
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev Accuracy (valence): 0.2000
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev Precision (arousal): 0.1312
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev Precision (valence): 0.0635
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev Recall (arousal): 0.3333
+2025-12-04 08:02:02,871 - __main__ - INFO - Dev Recall (valence): 0.3333
+2025-12-04 08:02:02,871 - __main__ - INFO - Combined F1: 0.0197
+2025-12-04 08:02:02,871 - __main__ - INFO - Pearson R (arousal): 0.1450
+2025-12-04 08:02:02,871 - __main__ - INFO - Pearson R (valence): 0.0897
+2025-12-04 08:02:02,871 - __main__ - INFO - Pearson R (arousal) A: 0.1332
+2025-12-04 08:02:02,871 - __main__ - INFO - Pearson R (valence) A: -0.0037
+2025-12-04 08:02:02,871 - __main__ - INFO - Pearson R (arousal) B: 0.1356
+2025-12-04 08:02:02,871 - __main__ - INFO - Pearson R (valence) B: 0.1365
+2025-12-04 08:02:02,871 - __main__ - INFO - Pearson R (arousal) D: -0.1552
+2025-12-04 08:02:02,871 - __main__ - INFO - Pearson R (valence) D: -0.0105
+2025-12-04 08:02:02,871 - __main__ - INFO - Pearson R (arousal) G: -0.0232
+2025-12-04 08:02:02,871 - __main__ - INFO - Pearson R (valence) G: 0.0877
+2025-12-04 08:02:02,889 - __main__ - INFO -     Epoch:1/5       batch:0/156
+2025-12-04 08:04:02,942 - __main__ - INFO -     Epoch:1/5       batch:10/156
+2025-12-04 08:06:22,511 - __main__ - INFO -     Epoch:1/5       batch:20/156
+2025-12-04 08:08:18,195 - __main__ - INFO -     Epoch:1/5       batch:30/156
+2025-12-04 08:09:58,458 - __main__ - INFO -     Epoch:1/5       batch:40/156
+2025-12-04 08:11:32,959 - __main__ - INFO -     Epoch:1/5       batch:50/156
+2025-12-04 08:12:54,581 - __main__ - INFO -     Epoch:1/5       batch:60/156
+2025-12-04 08:14:33,562 - __main__ - INFO -     Epoch:1/5       batch:70/156
+2025-12-04 08:16:33,116 - __main__ - INFO -     Epoch:1/5       batch:80/156
+2025-12-04 08:18:44,523 - __main__ - INFO -     Epoch:1/5       batch:90/156
+2025-12-04 08:19:54,566 - __main__ - INFO -     Epoch:1/5       batch:100/156
+2025-12-04 08:21:22,675 - __main__ - INFO -     Epoch:1/5       batch:110/156
+2025-12-04 08:22:53,900 - __main__ - INFO -     Epoch:1/5       batch:120/156
+2025-12-04 08:24:36,064 - __main__ - INFO -     Epoch:1/5       batch:130/156
+2025-12-04 08:26:34,519 - __main__ - INFO -     Epoch:1/5       batch:140/156
+2025-12-04 08:28:57,560 - __main__ - INFO -     Epoch:1/5       batch:150/156
+2025-12-04 08:29:53,248 - __main__ - INFO - Epoch 1/5 average train loss: 1.0982
+2025-12-04 08:31:00,913 - __main__ - INFO - Valence predictions: tensor([3, 2, 4, 0, 2, 3, 2, 2, 4, 1, 2, 4, 2, 0, 0, 2, 2, 2, 4, 3, 1, 3, 1, 0,
+        3, 3, 3])
+2025-12-04 08:31:00,913 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2])
+2025-12-04 08:31:00,913 - __main__ - INFO - Arousal predictions: tensor([0, 2, 2, 1, 1, 1, 2, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1,
+        1, 1, 0])
+2025-12-04 08:31:00,913 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0])
+2025-12-04 08:31:00,913 - __main__ - INFO - Dev MAE ▒ Valence: 0.7112, Arousal: 0.4549
+2025-12-04 08:31:00,913 - __main__ - INFO - Dev F1 (arousal): 0.4688
+2025-12-04 08:31:00,913 - __main__ - INFO - Dev F1 (valence): 0.4309
+2025-12-04 08:31:00,913 - __main__ - INFO - Dev F1 A (arousal): 0.3512
+2025-12-04 08:31:00,913 - __main__ - INFO - Dev F1 A (valence): 0.3266
+2025-12-04 08:31:00,913 - __main__ - INFO - Dev F1 B (arousal): 0.4257
+2025-12-04 08:31:00,913 - __main__ - INFO - Dev F1 B (valence): 0.3661
+2025-12-04 08:31:00,929 - __main__ - INFO - Dev F1 D (arousal): 0.4792
+2025-12-04 08:31:00,929 - __main__ - INFO - Dev F1 D (valence): 0.3280
+2025-12-04 08:31:00,929 - __main__ - INFO - Dev F1 G (arousal): 0.5790
+2025-12-04 08:31:00,929 - __main__ - INFO - Dev F1 G (valence): 0.4438
+2025-12-04 08:31:00,929 - __main__ - INFO - Dev Accuracy (arousal): 0.4729
+2025-12-04 08:31:00,929 - __main__ - INFO - Dev Accuracy (valence): 0.4318
+2025-12-04 08:31:00,929 - __main__ - INFO - Dev Precision (arousal): 0.5365
+2025-12-04 08:31:00,929 - __main__ - INFO - Dev Precision (valence): 0.4714
+2025-12-04 08:31:00,929 - __main__ - INFO - Dev Recall (arousal): 0.4729
+2025-12-04 08:31:00,929 - __main__ - INFO - Dev Recall (valence): 0.4729
+2025-12-04 08:31:00,929 - __main__ - INFO - Combined F1: 0.2259
+2025-12-04 08:31:00,929 - __main__ - INFO - Pearson R (arousal): 0.5792
+2025-12-04 08:31:00,929 - __main__ - INFO - Pearson R (valence): 0.7012
+2025-12-04 08:31:00,929 - __main__ - INFO - Pearson R (arousal) A: 0.5356
+2025-12-04 08:31:00,929 - __main__ - INFO - Pearson R (valence) A: 0.6968
+2025-12-04 08:31:00,929 - __main__ - INFO - Pearson R (arousal) B: 0.5208
+2025-12-04 08:31:00,929 - __main__ - INFO - Pearson R (valence) B: 0.6843
+2025-12-04 08:31:00,929 - __main__ - INFO - Pearson R (arousal) D: 0.5665
+2025-12-04 08:31:00,929 - __main__ - INFO - Pearson R (valence) D: 0.6898
+2025-12-04 08:31:00,929 - __main__ - INFO - Pearson R (arousal) G: 0.5988
+2025-12-04 08:31:00,929 - __main__ - INFO - Pearson R (valence) G: 0.6945
+2025-12-04 08:31:00,944 - __main__ - INFO -     Epoch:2/5       batch:0/156
+2025-12-04 08:32:53,070 - __main__ - INFO -     Epoch:2/5       batch:10/156
+2025-12-04 08:35:09,206 - __main__ - INFO -     Epoch:2/5       batch:20/156
+2025-12-04 08:37:03,677 - __main__ - INFO -     Epoch:2/5       batch:30/156
+2025-12-04 08:38:43,706 - __main__ - INFO -     Epoch:2/5       batch:40/156
+2025-12-04 08:40:16,633 - __main__ - INFO -     Epoch:2/5       batch:50/156
+2025-12-04 08:41:37,861 - __main__ - INFO -     Epoch:2/5       batch:60/156
+2025-12-04 08:43:16,475 - __main__ - INFO -     Epoch:2/5       batch:70/156
+2025-12-04 08:45:16,944 - __main__ - INFO -     Epoch:2/5       batch:80/156
+2025-12-04 08:47:28,015 - __main__ - INFO -     Epoch:2/5       batch:90/156
+2025-12-04 08:48:37,082 - __main__ - INFO -     Epoch:2/5       batch:100/156
+2025-12-04 08:50:05,144 - __main__ - INFO -     Epoch:2/5       batch:110/156
+2025-12-04 08:51:35,748 - __main__ - INFO -     Epoch:2/5       batch:120/156
+2025-12-04 08:53:17,640 - __main__ - INFO -     Epoch:2/5       batch:130/156
+2025-12-04 08:55:16,175 - __main__ - INFO -     Epoch:2/5       batch:140/156
+2025-12-04 08:57:39,576 - __main__ - INFO -     Epoch:2/5       batch:150/156
+2025-12-04 08:58:35,340 - __main__ - INFO - Epoch 2/5 average train loss: 0.9282
+2025-12-04 08:59:43,233 - __main__ - INFO - Valence predictions: tensor([3, 1, 3, 0, 2, 3, 2, 2, 4, 1, 3, 4, 1, 1, 0, 2, 2, 2, 4, 3, 1, 3, 1, 0,
+        3, 3, 2])
+2025-12-04 08:59:43,233 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2])
+2025-12-04 08:59:43,233 - __main__ - INFO - Arousal predictions: tensor([0, 2, 1, 1, 1, 1, 2, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 2,
+        1, 1, 1])
+2025-12-04 08:59:43,233 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0])
+2025-12-04 08:59:43,233 - __main__ - INFO - Dev MAE ▒ Valence: 0.6823, Arousal: 0.3971
+2025-12-04 08:59:43,235 - __main__ - INFO - Dev F1 (arousal): 0.5698
+2025-12-04 08:59:43,235 - __main__ - INFO - Dev F1 (valence): 0.4150
+2025-12-04 08:59:43,235 - __main__ - INFO - Dev F1 A (arousal): 0.4873
+2025-12-04 08:59:43,235 - __main__ - INFO - Dev F1 A (valence): 0.3324
+2025-12-04 08:59:43,235 - __main__ - INFO - Dev F1 B (arousal): 0.5255
+2025-12-04 08:59:43,235 - __main__ - INFO - Dev F1 B (valence): 0.3702
+2025-12-04 08:59:43,235 - __main__ - INFO - Dev F1 D (arousal): 0.5776
+2025-12-04 08:59:43,235 - __main__ - INFO - Dev F1 D (valence): 0.4011
+2025-12-04 08:59:43,251 - __main__ - INFO - Dev F1 G (arousal): 0.6364
+2025-12-04 08:59:43,251 - __main__ - INFO - Dev F1 G (valence): 0.4376
+2025-12-04 08:59:43,251 - __main__ - INFO - Dev Accuracy (arousal): 0.5565
+2025-12-04 08:59:43,251 - __main__ - INFO - Dev Accuracy (valence): 0.4191
+2025-12-04 08:59:43,251 - __main__ - INFO - Dev Precision (arousal): 0.6358
+2025-12-04 08:59:43,251 - __main__ - INFO - Dev Precision (valence): 0.4755
+2025-12-04 08:59:43,251 - __main__ - INFO - Dev Recall (arousal): 0.5565
+2025-12-04 08:59:43,251 - __main__ - INFO - Dev Recall (valence): 0.5565
+2025-12-04 08:59:43,251 - __main__ - INFO - Combined F1: 0.2378
+2025-12-04 08:59:43,251 - __main__ - INFO - Pearson R (arousal): 0.6242
+2025-12-04 08:59:43,251 - __main__ - INFO - Pearson R (valence): 0.7226
+2025-12-04 08:59:43,251 - __main__ - INFO - Pearson R (arousal) A: 0.5968
+2025-12-04 08:59:43,251 - __main__ - INFO - Pearson R (valence) A: 0.7213
+2025-12-04 08:59:43,251 - __main__ - INFO - Pearson R (arousal) B: 0.5955
+2025-12-04 08:59:43,251 - __main__ - INFO - Pearson R (valence) B: 0.7063
+2025-12-04 08:59:43,251 - __main__ - INFO - Pearson R (arousal) D: 0.6260
+2025-12-04 08:59:43,251 - __main__ - INFO - Pearson R (valence) D: 0.7152
+2025-12-04 08:59:43,251 - __main__ - INFO - Pearson R (arousal) G: 0.6229
+2025-12-04 08:59:43,251 - __main__ - INFO - Pearson R (valence) G: 0.7195
+2025-12-04 08:59:43,251 - __main__ - INFO -     Epoch:3/5       batch:0/156
+2025-12-04 09:01:36,460 - __main__ - INFO -     Epoch:3/5       batch:10/156
+2025-12-04 09:03:51,822 - __main__ - INFO -     Epoch:3/5       batch:20/156
+2025-12-04 09:05:47,465 - __main__ - INFO -     Epoch:3/5       batch:30/156
+2025-12-04 09:07:27,298 - __main__ - INFO -     Epoch:3/5       batch:40/156
+2025-12-04 09:09:00,582 - __main__ - INFO -     Epoch:3/5       batch:50/156
+2025-12-04 09:10:21,150 - __main__ - INFO -     Epoch:3/5       batch:60/156
+2025-12-04 09:11:58,738 - __main__ - INFO -     Epoch:3/5       batch:70/156
+2025-12-04 09:13:58,986 - __main__ - INFO -     Epoch:3/5       batch:80/156
+2025-12-04 09:16:10,834 - __main__ - INFO -     Epoch:3/5       batch:90/156
+2025-12-04 09:17:20,335 - __main__ - INFO -     Epoch:3/5       batch:100/156
+2025-12-04 09:18:47,600 - __main__ - INFO -     Epoch:3/5       batch:110/156
+2025-12-04 09:20:18,760 - __main__ - INFO -     Epoch:3/5       batch:120/156
+2025-12-04 09:22:00,952 - __main__ - INFO -     Epoch:3/5       batch:130/156
+2025-12-04 09:23:59,396 - __main__ - INFO -     Epoch:3/5       batch:140/156
+2025-12-04 09:26:22,177 - __main__ - INFO -     Epoch:3/5       batch:150/156
+2025-12-04 09:27:18,022 - __main__ - INFO - Epoch 3/5 average train loss: 0.8539
+2025-12-04 09:28:26,284 - __main__ - INFO - Valence predictions: tensor([3, 1, 3, 0, 2, 4, 2, 2, 4, 1, 3, 4, 2, 1, 0, 2, 2, 2, 4, 4, 1, 2, 0, 0,
+        4, 3, 2])
+2025-12-04 09:28:26,284 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2])
+2025-12-04 09:28:26,284 - __main__ - INFO - Arousal predictions: tensor([0, 2, 1, 1, 0, 1, 2, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 2,
+        1, 1, 1])
+2025-12-04 09:28:26,284 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0])
+2025-12-04 09:28:26,284 - __main__ - INFO - Dev MAE ▒ Valence: 0.6426, Arousal: 0.4043
+2025-12-04 09:28:26,288 - __main__ - INFO - Dev F1 (arousal): 0.6037
+2025-12-04 09:28:26,288 - __main__ - INFO - Dev F1 (valence): 0.4704
+2025-12-04 09:28:26,288 - __main__ - INFO - Dev F1 A (arousal): 0.5671
+2025-12-04 09:28:26,288 - __main__ - INFO - Dev F1 A (valence): 0.3558
+2025-12-04 09:28:26,288 - __main__ - INFO - Dev F1 B (arousal): 0.5589
+2025-12-04 09:28:26,288 - __main__ - INFO - Dev F1 B (valence): 0.4143
+2025-12-04 09:28:26,288 - __main__ - INFO - Dev F1 D (arousal): 0.6061
+2025-12-04 09:28:26,288 - __main__ - INFO - Dev F1 D (valence): 0.4386
+2025-12-04 09:28:26,288 - __main__ - INFO - Dev F1 G (arousal): 0.6368
+2025-12-04 09:28:26,288 - __main__ - INFO - Dev F1 G (valence): 0.4657
+2025-12-04 09:28:26,304 - __main__ - INFO - Dev Accuracy (arousal): 0.5970
+2025-12-04 09:28:26,304 - __main__ - INFO - Dev Accuracy (valence): 0.4714
+2025-12-04 09:28:26,304 - __main__ - INFO - Dev Precision (arousal): 0.6201
+2025-12-04 09:28:26,304 - __main__ - INFO - Dev Precision (valence): 0.5087
+2025-12-04 09:28:26,304 - __main__ - INFO - Dev Recall (arousal): 0.5970
+2025-12-04 09:28:26,304 - __main__ - INFO - Dev Recall (valence): 0.5970
+2025-12-04 09:28:26,304 - __main__ - INFO - Combined F1: 0.2636
+2025-12-04 09:28:26,304 - __main__ - INFO - Pearson R (arousal): 0.6394
+2025-12-04 09:28:26,304 - __main__ - INFO - Pearson R (valence): 0.7325
+2025-12-04 09:28:26,304 - __main__ - INFO - Pearson R (arousal) A: 0.6102
+2025-12-04 09:28:26,304 - __main__ - INFO - Pearson R (valence) A: 0.7228
+2025-12-04 09:28:26,304 - __main__ - INFO - Pearson R (arousal) B: 0.6258
+2025-12-04 09:28:26,304 - __main__ - INFO - Pearson R (valence) B: 0.7256
+2025-12-04 09:28:26,304 - __main__ - INFO - Pearson R (arousal) D: 0.6413
+2025-12-04 09:28:26,304 - __main__ - INFO - Pearson R (valence) D: 0.7292
+2025-12-04 09:28:26,304 - __main__ - INFO - Pearson R (arousal) G: 0.6294
+2025-12-04 09:28:26,304 - __main__ - INFO - Pearson R (valence) G: 0.7221
+2025-12-04 09:28:26,304 - __main__ - INFO -     Epoch:4/5       batch:0/156
+2025-12-04 09:30:18,734 - __main__ - INFO -     Epoch:4/5       batch:10/156
+2025-12-04 09:32:35,172 - __main__ - INFO -     Epoch:4/5       batch:20/156
+2025-12-04 09:34:29,971 - __main__ - INFO -     Epoch:4/5       batch:30/156
+2025-12-04 09:36:10,889 - __main__ - INFO -     Epoch:4/5       batch:40/156
+2025-12-04 09:37:44,222 - __main__ - INFO -     Epoch:4/5       batch:50/156
+2025-12-04 09:39:05,577 - __main__ - INFO -     Epoch:4/5       batch:60/156
+2025-12-04 09:40:42,819 - __main__ - INFO -     Epoch:4/5       batch:70/156
+2025-12-04 09:42:41,551 - __main__ - INFO -     Epoch:4/5       batch:80/156
+2025-12-04 09:44:52,710 - __main__ - INFO -     Epoch:4/5       batch:90/156
+2025-12-04 09:46:01,939 - __main__ - INFO -     Epoch:4/5       batch:100/156
+2025-12-04 09:47:29,276 - __main__ - INFO -     Epoch:4/5       batch:110/156
+2025-12-04 09:49:00,086 - __main__ - INFO -     Epoch:4/5       batch:120/156
+2025-12-04 09:50:42,172 - __main__ - INFO -     Epoch:4/5       batch:130/156
+2025-12-04 09:52:39,465 - __main__ - INFO -     Epoch:4/5       batch:140/156
+2025-12-04 09:55:04,871 - __main__ - INFO -     Epoch:4/5       batch:150/156
+2025-12-04 09:56:00,317 - __main__ - INFO - Epoch 4/5 average train loss: 0.8105
+2025-12-04 09:57:08,075 - __main__ - INFO - Valence predictions: tensor([3, 1, 3, 0, 3, 4, 2, 0, 4, 0, 3, 4, 2, 1, 0, 2, 2, 2, 4, 4, 1, 2, 0, 0,
+        3, 3, 2])
+2025-12-04 09:57:08,077 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2])
+2025-12-04 09:57:08,077 - __main__ - INFO - Arousal predictions: tensor([0, 2, 1, 1, 1, 1, 2, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1,
+        1, 1, 1])
+2025-12-04 09:57:08,077 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0])
+2025-12-04 09:57:08,077 - __main__ - INFO - Dev MAE ▒ Valence: 0.6426, Arousal: 0.3682
+2025-12-04 09:57:08,081 - __main__ - INFO - Dev F1 (arousal): 0.6302
+2025-12-04 09:57:08,081 - __main__ - INFO - Dev F1 (valence): 0.4764
+2025-12-04 09:57:08,083 - __main__ - INFO - Dev F1 A (arousal): 0.5764
+2025-12-04 09:57:08,083 - __main__ - INFO - Dev F1 A (valence): 0.3618
+2025-12-04 09:57:08,085 - __main__ - INFO - Dev F1 B (arousal): 0.5914
+2025-12-04 09:57:08,085 - __main__ - INFO - Dev F1 B (valence): 0.4332
+2025-12-04 09:57:08,087 - __main__ - INFO - Dev F1 D (arousal): 0.6474
+2025-12-04 09:57:08,087 - __main__ - INFO - Dev F1 D (valence): 0.4366
+2025-12-04 09:57:08,091 - __main__ - INFO - Dev F1 G (arousal): 0.6590
+2025-12-04 09:57:08,091 - __main__ - INFO - Dev F1 G (valence): 0.4541
+2025-12-04 09:57:08,093 - __main__ - INFO - Dev Accuracy (arousal): 0.6155
+2025-12-04 09:57:08,093 - __main__ - INFO - Dev Accuracy (valence): 0.4784
+2025-12-04 09:57:08,095 - __main__ - INFO - Dev Precision (arousal): 0.6623
+2025-12-04 09:57:08,095 - __main__ - INFO - Dev Precision (valence): 0.4944
+2025-12-04 09:57:08,097 - __main__ - INFO - Dev Recall (arousal): 0.6155
+2025-12-04 09:57:08,097 - __main__ - INFO - Dev Recall (valence): 0.6155
+2025-12-04 09:57:08,099 - __main__ - INFO - Combined F1: 0.2868
+2025-12-04 09:57:08,099 - __main__ - INFO - Pearson R (arousal): 0.6431
+2025-12-04 09:57:08,099 - __main__ - INFO - Pearson R (valence): 0.7413
+2025-12-04 09:57:08,099 - __main__ - INFO - Pearson R (arousal) A: 0.6217
+2025-12-04 09:57:08,099 - __main__ - INFO - Pearson R (valence) A: 0.7369
+2025-12-04 09:57:08,099 - __main__ - INFO - Pearson R (arousal) B: 0.6211
+2025-12-04 09:57:08,099 - __main__ - INFO - Pearson R (valence) B: 0.7324
+2025-12-04 09:57:08,101 - __main__ - INFO - Pearson R (arousal) D: 0.6399
+2025-12-04 09:57:08,101 - __main__ - INFO - Pearson R (valence) D: 0.7330
+2025-12-04 09:57:08,101 - __main__ - INFO - Pearson R (arousal) G: 0.6331
+2025-12-04 09:57:08,101 - __main__ - INFO - Pearson R (valence) G: 0.7271
+2025-12-04 09:57:08,103 - __main__ - INFO -     Epoch:5/5       batch:0/156
+2025-12-04 09:59:00,777 - __main__ - INFO -     Epoch:5/5       batch:10/156
+2025-12-04 10:01:15,899 - __main__ - INFO -     Epoch:5/5       batch:20/156
+2025-12-04 10:03:10,919 - __main__ - INFO -     Epoch:5/5       batch:30/156
+2025-12-04 10:04:51,726 - __main__ - INFO -     Epoch:5/5       batch:40/156
+2025-12-04 10:06:24,515 - __main__ - INFO -     Epoch:5/5       batch:50/156
+2025-12-04 10:07:45,433 - __main__ - INFO -     Epoch:5/5       batch:60/156
+2025-12-04 10:09:23,760 - __main__ - INFO -     Epoch:5/5       batch:70/156
+2025-12-04 10:11:23,116 - __main__ - INFO -     Epoch:5/5       batch:80/156
+2025-12-04 10:13:34,633 - __main__ - INFO -     Epoch:5/5       batch:90/156
+2025-12-04 10:14:44,031 - __main__ - INFO -     Epoch:5/5       batch:100/156
+2025-12-04 10:16:11,589 - __main__ - INFO -     Epoch:5/5       batch:110/156
+2025-12-04 10:17:42,784 - __main__ - INFO -     Epoch:5/5       batch:120/156
+2025-12-04 10:19:25,481 - __main__ - INFO -     Epoch:5/5       batch:130/156
+2025-12-04 10:21:23,851 - __main__ - INFO -     Epoch:5/5       batch:140/156
+2025-12-04 10:23:47,467 - __main__ - INFO -     Epoch:5/5       batch:150/156
+2025-12-04 10:24:43,413 - __main__ - INFO - Epoch 5/5 average train loss: 0.7666
+2025-12-04 10:25:51,607 - __main__ - INFO - Valence predictions: tensor([2, 1, 3, 0, 2, 4, 2, 0, 4, 1, 3, 4, 1, 0, 0, 0, 2, 2, 4, 4, 1, 2, 0, 0,
+        4, 4, 2])
+2025-12-04 10:25:51,607 - __main__ - INFO - Valence labels     : tensor([1, 0, 4, 0, 3, 4, 2, 3, 4, 2, 2, 4, 2, 3, 0, 1, 0, 4, 4, 4, 2, 2, 0, 0,
+        4, 3, 2])
+2025-12-04 10:25:51,607 - __main__ - INFO - Arousal predictions: tensor([0, 2, 1, 1, 1, 1, 2, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1,
+        1, 1, 1])
+2025-12-04 10:25:51,607 - __main__ - INFO - Arousal labels     : tensor([0, 1, 1, 1, 1, 1, 2, 0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 0, 1, 2, 1, 1, 0, 1,
+        1, 1, 0])
+2025-12-04 10:25:51,607 - __main__ - INFO - Dev MAE ▒ Valence: 0.6679, Arousal: 0.3827
+2025-12-04 10:25:51,607 - __main__ - INFO - Dev F1 (arousal): 0.6193
+2025-12-04 10:25:51,607 - __main__ - INFO - Dev F1 (valence): 0.4631
+2025-12-04 10:25:51,625 - __main__ - INFO - Dev F1 A (arousal): 0.5675
+2025-12-04 10:25:51,625 - __main__ - INFO - Dev F1 A (valence): 0.4120
+2025-12-04 10:25:51,627 - __main__ - INFO - Dev F1 B (arousal): 0.6075
+2025-12-04 10:25:51,627 - __main__ - INFO - Dev F1 B (valence): 0.4461
+2025-12-04 10:25:51,629 - __main__ - INFO - Dev F1 D (arousal): 0.6702
+2025-12-04 10:25:51,629 - __main__ - INFO - Dev F1 D (valence): 0.4780
+2025-12-04 10:25:51,631 - __main__ - INFO - Dev F1 G (arousal): 0.6415
+2025-12-04 10:25:51,631 - __main__ - INFO - Dev F1 G (valence): 0.4748
+2025-12-04 10:25:51,634 - __main__ - INFO - Dev Accuracy (arousal): 0.6076
+2025-12-04 10:25:51,634 - __main__ - INFO - Dev Accuracy (valence): 0.4724
+2025-12-04 10:25:51,636 - __main__ - INFO - Dev Precision (arousal): 0.6400
+2025-12-04 10:25:51,636 - __main__ - INFO - Dev Precision (valence): 0.4814
+2025-12-04 10:25:51,638 - __main__ - INFO - Dev Recall (arousal): 0.6076
+2025-12-04 10:25:51,638 - __main__ - INFO - Dev Recall (valence): 0.6076
+2025-12-04 10:25:51,638 - __main__ - INFO - Combined F1: 0.2887
+2025-12-04 10:25:51,640 - __main__ - INFO - Pearson R (arousal): 0.6390
+2025-12-04 10:25:51,640 - __main__ - INFO - Pearson R (valence): 0.7467
+2025-12-04 10:25:51,640 - __main__ - INFO - Pearson R (arousal) A: 0.6104
+2025-12-04 10:25:51,640 - __main__ - INFO - Pearson R (valence) A: 0.7447
+2025-12-04 10:25:51,640 - __main__ - INFO - Pearson R (arousal) B: 0.6350
+2025-12-04 10:25:51,640 - __main__ - INFO - Pearson R (valence) B: 0.7330
+2025-12-04 10:25:51,640 - __main__ - INFO - Pearson R (arousal) D: 0.6329
+2025-12-04 10:25:51,640 - __main__ - INFO - Pearson R (valence) D: 0.7355
+2025-12-04 10:25:51,640 - __main__ - INFO - Pearson R (arousal) G: 0.6232
+2025-12-04 10:25:51,640 - __main__ - INFO - Pearson R (valence) G: 0.7398
+2025-12-04 10:25:51,651 - __main__ - INFO - Saved model and bin metadata to: C:/Users/Troyb/cygwin/Troyb/repos/SemevalSecondary/Semeval2026Group8\Artifacts\arousal_head.pt

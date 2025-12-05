@@ -15,18 +15,17 @@ class Entry:
         self.valence = float(row.get('valence')) # -2,...,2
         self.arousal = float(row.get('arousal')) # 0,...,2
         self.user_id_index = None # gets assigned in the Dataset class 
-
+        
         self.__set_valence_class__()
         self.__set_arousal_class__()
     def __set_valence_class__(self):
-        valence_class = self.valence + 2.0 # 0,...,4
-        valence_class = max(0.0, min(4.0, valence_class))
-        self.valence_class = valence_class / 4 # 0,...,1
+        valence_class = self.valence # -2,...,2
+        valence_class = max(-2.0, min(2.0, valence_class))
+        self.valence_class = valence_class# -2,...,2
     def __set_arousal_class__(self):
-        arousal_class = self.arousal # 0,...,2
-        arousal_class = max(0.0, min(2.0, arousal_class))
-        self.arousal_class = arousal_class / 2 # 0,...,1
+        arousal_class = self.arousal - 1.0 # -1,...,1
+        arousal_class = max(-1.0, min(1.0, arousal_class))
+        self.arousal_class = arousal_class# 0,...,2
     def __repr__(self):
         return (
-            f"Entry(user_id={self.user_id}, text_id={self.text_id}, text={self.text}, timestamp={self.timestamp}, collection_phase={self.collection_phase}, is_words={self.is_words}, valence={self.valence}, arousal={self.arousal}, valence_class={self.valence_class}, arousal_class={self.arousal_class})"
-        )
+            f"Entry(user_id={self.user_id}, text_id={self.text_id}, text={self.text}, timestamp={self.timestamp}, collection_phase={self.collection_phase}, is_words={self.is_words}, valence={self.valence}, arousal={self.arousal}, valence_class={self.valence_class}, arousal_class={self.arousal_class})")
