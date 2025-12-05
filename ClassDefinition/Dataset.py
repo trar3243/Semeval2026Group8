@@ -72,7 +72,7 @@ class Dataset:
         self.robertaD = robertaD
         self.robertaG = robertaG
         self.robertaH = robertaH
-        self.trainSet, self.devSet = train_test_split(self.entryList, test_size=0.2, random_state=42)
+        self.trainSet, self.devSet = train_test_split(self.entryList, test_size=0.1, random_state=42)
         self.trainBatchList = None
         self.devBatchList = None
 
