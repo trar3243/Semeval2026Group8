@@ -3,6 +3,9 @@ import sys, os, random
 import torch
 import torch.nn.functional as F
 from torchmetrics.classification import F1Score, Accuracy, Precision, Recall
+from sklearn.metrics import confusion_matrix
+import seaborn
+import matplotlib.pyplot
 
 SEMROOT = os.environ['SEMROOT']
 sys.path.append(SEMROOT)
@@ -478,6 +481,32 @@ def evaluate_arousal_mae(
     print(f"Pearson R (arousal) G: {pearson_arousal:.4f}")
     print(f"Pearson R (valence) G: {pearson_valence:.4f}")
     
+    #CONFUSION MATRICIES
+    arousal_predictions_numpy = arousal_predictions.cpu().numpy()
+    arousal_labels_numpy = arousal_labels.cpu().numpy()
+    valence_predictions_numpy = valence_predictions.cpu().numpy()
+    valence_labels_numpy = valence_labels.cpu().numpy()
+
+    arousal_confusion = confusion_matrix(arousal_labels_numpy,arousal_predictions_numpy)
+    valence_confusion = confusion_matrix(valence_labels_numpy,valence_predictions_numpy)
+
+    #SEABORN CONFUSION MATRIX PLOTS
+    arousal_axes = [-1, 0, 1]
+    valence_axes = [-2, -1, 0, 1, 2]
+    
+    plt.figure(figsize=(6,5))
+    sns.heatmap(arousal_confusion, annot=True, fmt="d", cmap="Blues", xticklabels=arousal_axes, yticklabels=arousal_axes)
+    plt.title("Composite - Arousal Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+    plt.figure(figsize=(6,5))
+    sns.heatmap(valence_confusion, annot=True, fmt="d", cmap="Blues", xticklabels=valence_axes, yticklabels=valence_axes)
+    plt.title("Composite - Valence Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
     
     return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1, pearson_arousal, pearson_valence)
 
