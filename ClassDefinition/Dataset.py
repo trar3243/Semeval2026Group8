@@ -62,7 +62,7 @@ class Batch:
 class Dataset:
     def __init__(
         self, 
-        dataPath, lexiconLookupPath, 
+        dataPath, 
         robertaA, robertaB, robertaD, robertaG, robertaH
     ):
         self.__set_entry_list__(dataPath)

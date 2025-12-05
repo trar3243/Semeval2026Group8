@@ -77,6 +77,7 @@ def trainingLoop(
         dataset.robertaB.getModel().train()
         dataset.robertaD.getModel().train()
         dataset.robertaG.getModel().train()
+        dataset.robertaH.getModel().train()
 
         for j in range(number_of_batches):
             if j % 10 == 0:
@@ -165,8 +166,9 @@ def trainingLoop(
             torch.nn.utils.clip_grad_norm_(modelD.parameters(), 1.0)
             torch.nn.utils.clip_grad_norm_(dataset.robertaD.getParameters(), 1.0)
             torch.nn.utils.clip_grad_norm_(modelG.parameters(), 1.0)
-            torch.nn.utils.clip_grad_norm_(modelH.parameters(), 1.0)
             torch.nn.utils.clip_grad_norm_(dataset.robertaG.getParameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(modelH.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(dataset.robertaH.getParameters(), 1.0)
 
             # optimizers
             optimizerA.step()
@@ -218,6 +220,19 @@ def evaluate_arousal_mae(
     arousal_labels=[]
     valence_labels=[]
 
+    arousal_predictions_continuous_A = []
+    valence_predictions_continuous_A = []
+    arousal_predictions_continuous_B = []
+    valence_predictions_continuous_B = []
+    arousal_predictions_continuous_D = []
+    valence_predictions_continuous_D = []
+    arousal_predictions_continuous_G = []
+    valence_predictions_continuous_G = []
+    arousal_predictions_continuous_H = []
+    valence_predictions_continuous_H = []
+    arousal_predictions_continuous = []
+    valence_predictions_continuous = []
+    
     with torch.no_grad():
         for dev_batch in dataset.getDevBatchList():
             cls_embeddingsA = dev_batch.getClsEmbeddingsA()
@@ -227,26 +242,31 @@ def evaluate_arousal_mae(
             cls_embeddingsH = dev_batch.getClsEmbeddingsH()
             user_indices = dev_batch.getUserIndices()
             is_words = dev_batch.getIsWords()
-
+            
             # class labels
             arousalLabels = (dev_batch.arousalLabelList + 1.0).to(torch.long)
             valenceLabels = (dev_batch.valenceLabelList + 2.0).to(torch.long)
+            
 
-            # predictions (no lexicon)
+            # get predictions of the model
             predictionsA = modelA(cls_embeddingsA, user_indices, is_words)
             predictionsB = modelB(cls_embeddingsB, user_indices, is_words)
             predictionsD = modelD(cls_embeddingsD, user_indices, is_words)
             predictionsG = modelG(cls_embeddingsG, user_indices, is_words)
             predictionsH = modelH(cls_embeddingsH, user_indices, is_words)
 
-            predictionsAArousal = torch.round(predictionsA["arousal"] * 2).clamp(0, 2)
-            predictionsAValence = torch.round(predictionsA["valence"] * 4).clamp(0, 4)
+            predictionsAArousal = torch.round(predictionsA["arousal"] * 2)
+            predictionsAValence = torch.round(predictionsA["valence"] * 4)
+            predictionsAArousalCont = predictionsA["arousal"] * 2
+            predictionsAValenceCont = predictionsA["valence"] * 4
 
             predictionsBArousal = torch.round(
-                torch.clamp(predictionsB["arousal"] + 1, min=0, max=2)
+                torch.clamp(predictionsB["arousal"] + 1,
+                min=0, max=2)
             )
             predictionsBValence = torch.round(
-                torch.clamp(predictionsB["valence"] + 2, min=0, max=4)
+                torch.clamp(predictionsB["valence"] + 2,
+                min=0, max=4)
             )
             predictionsBArousalCont = torch.clamp(predictionsB["arousal"] + 1,min=0.0, max=2.0)
             predictionsBValenceCont = torch.clamp(predictionsB["valence"] + 2,min=0.0, max=4.0)
@@ -268,6 +288,30 @@ def evaluate_arousal_mae(
 
             predictionsHArousal = (torch.sigmoid(predictionsH["arousal"]) > 0.5).sum(dim=1)
             predictionsHValence = (torch.sigmoid(predictionsH["valence"]) > 0.5).sum(dim=1)
+            predictionsHArousalCont = (torch.sigmoid(predictionsH["arousal"])).sum(dim=1) # sum of the probabilities 
+            predictionsHValenceCont = (torch.sigmoid(predictionsH["valence"])).sum(dim=1)
+
+            arousal_predictions_A.append(predictionsAArousal.to(torch.long))
+            valence_predictions_A.append(predictionsAValence.to(torch.long))
+            arousal_predictions_B.append(predictionsBArousal.to(torch.long))
+            valence_predictions_B.append(predictionsBValence.to(torch.long))
+            arousal_predictions_D.append(predictionsDArousal.to(torch.long))
+            valence_predictions_D.append(predictionsDValence.to(torch.long))
+            arousal_predictions_G.append(predictionsGArousal.to(torch.long))
+            valence_predictions_G.append(predictionsGValence.to(torch.long))
+            arousal_predictions_H.append(predictionsHArousal.to(torch.long))
+            valence_predictions_H.append(predictionsHValence.to(torch.long))
+            
+            arousal_predictions_continuous_A.append(predictionsAArousalCont.to(torch.float32))
+            valence_predictions_continuous_A.append(predictionsAValenceCont.to(torch.float32))
+            arousal_predictions_continuous_B.append(predictionsBArousalCont.to(torch.float32))
+            valence_predictions_continuous_B.append(predictionsBValenceCont.to(torch.float32))
+            arousal_predictions_continuous_D.append(predictionsDArousalCont.to(torch.float32))
+            valence_predictions_continuous_D.append(predictionsDValenceCont.to(torch.float32))
+            arousal_predictions_continuous_G.append(predictionsGArousalCont.to(torch.float32))
+            valence_predictions_continuous_G.append(predictionsGValenceCont.to(torch.float32))
+            arousal_predictions_continuous_H.append(predictionsHArousalCont.to(torch.float32))
+            valence_predictions_continuous_H.append(predictionsHValenceCont.to(torch.float32))
 
             arousalVotes = torch.stack([
                 predictionsAArousal.to(torch.long),
@@ -276,7 +320,6 @@ def evaluate_arousal_mae(
                 predictionsGArousal.to(torch.long),
                 predictionsHArousal.to(torch.long)], dim=0
             )
-
             valenceVotes = torch.stack([
                 predictionsAValence.to(torch.long),
                 predictionsBValence.to(torch.long),
@@ -288,13 +331,15 @@ def evaluate_arousal_mae(
                 predictionsAArousalCont.to(torch.float32),
                 predictionsBArousalCont.to(torch.float32),
                 predictionsDArousalCont.to(torch.float32),
-                predictionsGArousalCont.to(torch.float32)], dim=0
+                predictionsGArousalCont.to(torch.float32),
+                predictionsHArousalCont.to(torch.float32)], dim=0
             )
             valenceVotesCont = torch.stack([
                 predictionsAValenceCont.to(torch.float32),
                 predictionsBValenceCont.to(torch.float32),
                 predictionsDValenceCont.to(torch.float32),
-                predictionsGValenceCont.to(torch.float32)], dim=0
+                predictionsGValenceCont.to(torch.float32),
+                predictionsHValenceCont.to(torch.float32)], dim=0
             )
 
             arousal_predicted = torch.mode(arousalVotes, dim=0).values
@@ -307,19 +352,9 @@ def evaluate_arousal_mae(
             arousal_predictions_continuous.append(arousal_predicted_cont)
             valence_predictions_continuous.append(valence_predicted_cont)
 
-            arousal_predictions_A.append(predictionsAArousal.to(torch.long))
-            valence_predictions_A.append(predictionsAValence.to(torch.long))
-            arousal_predictions_B.append(predictionsBArousal.to(torch.long))
-            valence_predictions_B.append(predictionsBValence.to(torch.long))
-            arousal_predictions_D.append(predictionsDArousal.to(torch.long))
-            valence_predictions_D.append(predictionsDValence.to(torch.long))
-            arousal_predictions_G.append(predictionsGArousal.to(torch.long))
-            valence_predictions_G.append(predictionsGValence.to(torch.long))
-            arousal_predictions_H.append(predictionsHArousal.to(torch.long))
-            valence_predictions_H.append(predictionsHValence.to(torch.long))
+            valence_labels.append((dev_batch.valenceLabelList + 2.0).to(torch.long))
+            arousal_labels.append((dev_batch.arousalLabelList + 1.0).to(torch.long))
 
-            valence_labels.append(valenceLabels)
-            arousal_labels.append(arousalLabels)
 
     arousal_predictions = torch.cat(arousal_predictions, dim=0)
     valence_predictions = torch.cat(valence_predictions, dim=0)
@@ -346,6 +381,8 @@ def evaluate_arousal_mae(
     arousal_predictions_continuous_D = torch.cat(arousal_predictions_continuous_D, dim=0)
     valence_predictions_continuous_G = torch.cat(valence_predictions_continuous_G, dim=0)
     arousal_predictions_continuous_G = torch.cat(arousal_predictions_continuous_G, dim=0)
+    valence_predictions_continuous_H = torch.cat(valence_predictions_continuous_H, dim=0)
+    arousal_predictions_continuous_H = torch.cat(arousal_predictions_continuous_H, dim=0)
     
     n = max(1, len(arousal_predictions) // 10)
     print(f"Valence predictions: {valence_predictions[:n]}")
@@ -364,35 +401,36 @@ def evaluate_arousal_mae(
     f1ScoreValence = f1(target=valence_labels.long(), preds=valence_predictions.long())
     print(f"Dev F1 (arousal): {f1ScoreArousal:.4f}")
     print(f"Dev F1 (valence): {f1ScoreValence:.4f}")
-
+    #Separate F1 for Arousal, Valence
     f1 = F1Score(task='multiclass',num_classes=3, average='macro')
-    f1ScoreArousalA = f1(target=arousal_labels.long(), preds=arousal_predictions_A.long())
+    f1ScoreArousal = f1(target=arousal_labels.long(), preds=arousal_predictions_A.long())
     f1 = F1Score(task='multiclass',num_classes=5, average='macro')
-    f1ScoreValenceA = f1(target=valence_labels.long(), preds=valence_predictions_A.long())
-    print(f"Dev F1 A (arousal): {f1ScoreArousalA:.4f}")
-    print(f"Dev F1 A (valence): {f1ScoreValenceA:.4f}")
-
+    f1ScoreValence = f1(target=valence_labels.long(), preds=valence_predictions_A.long())
+    print(f"Dev F1 A (arousal): {f1ScoreArousal:.4f}")
+    print(f"Dev F1 A (valence): {f1ScoreValence:.4f}")
+    #Separate F1 for Arousal, Valence
     f1 = F1Score(task='multiclass',num_classes=3, average='macro')
-    f1ScoreArousalB = f1(target=arousal_labels.long(), preds=arousal_predictions_B.long())
+    f1ScoreArousal = f1(target=arousal_labels.long(), preds=arousal_predictions_B.long())
     f1 = F1Score(task='multiclass',num_classes=5, average='macro')
-    f1ScoreValenceB = f1(target=valence_labels.long(), preds=valence_predictions_B.long())
-    print(f"Dev F1 B (arousal): {f1ScoreArousalB:.4f}")
-    print(f"Dev F1 B (valence): {f1ScoreValenceB:.4f}")
-
+    f1ScoreValence = f1(target=valence_labels.long(), preds=valence_predictions_B.long())
+    print(f"Dev F1 B (arousal): {f1ScoreArousal:.4f}")
+    print(f"Dev F1 B (valence): {f1ScoreValence:.4f}")
+    #Separate F1 for Arousal, Valence
     f1 = F1Score(task='multiclass',num_classes=3, average='macro')
-    f1ScoreArousalD = f1(target=arousal_labels.long(), preds=arousal_predictions_D.long())
+    f1ScoreArousal = f1(target=arousal_labels.long(), preds=arousal_predictions_D.long())
     f1 = F1Score(task='multiclass',num_classes=5, average='macro')
-    f1ScoreValenceD = f1(target=valence_labels.long(), preds=valence_predictions_D.long())
-    print(f"Dev F1 D (arousal): {f1ScoreArousalD:.4f}")
-    print(f"Dev F1 D (valence): {f1ScoreValenceD:.4f}")
-
+    f1ScoreValence = f1(target=valence_labels.long(), preds=valence_predictions_D.long())
+    print(f"Dev F1 D (arousal): {f1ScoreArousal:.4f}")
+    print(f"Dev F1 D (valence): {f1ScoreValence:.4f}")
+    #Separate F1 for Arousal, Valence
     f1 = F1Score(task='multiclass',num_classes=3, average='macro')
-    f1ScoreArousalG = f1(target=arousal_labels.long(), preds=arousal_predictions_G.long())
+    f1ScoreArousal = f1(target=arousal_labels.long(), preds=arousal_predictions_G.long())
     f1 = F1Score(task='multiclass',num_classes=5, average='macro')
-    f1ScoreValenceG = f1(target=valence_labels.long(), preds=valence_predictions_G.long())
-    print(f"Dev F1 G (arousal): {f1ScoreArousalG:.4f}")
-    print(f"Dev F1 G (valence): {f1ScoreValenceG:.4f}")
+    f1ScoreValence = f1(target=valence_labels.long(), preds=valence_predictions_G.long())
+    print(f"Dev F1 G (arousal): {f1ScoreArousal:.4f}")
+    print(f"Dev F1 G (valence): {f1ScoreValence:.4f}")
 
+    #Separate Accuracy for Arousal, Valence
     f1 = F1Score(task='multiclass',num_classes=3, average='macro')
     f1ScoreArousalH = f1(target=arousal_labels.long(), preds=arousal_predictions_H.long())
     f1 = F1Score(task='multiclass',num_classes=5, average='macro')
@@ -416,7 +454,7 @@ def evaluate_arousal_mae(
     print(f"Dev Recall (valence): {RecallValence:.4f}")
 
     Combined_Predictions = (arousal_predictions.long() * 5) + valence_predictions.long()
-    Combined_Labels = (arousal_labels.long() * 5) + valence_labels.long()
+    Combined_Labels = (arousal_labels.long() * 5) + valence_labels.long() 
     CombinedF1  = F1Score(task='multiclass', num_classes=15, average='macro')(Combined_Predictions, Combined_Labels)
     print(f"Combined F1: {CombinedF1:.4f}")
 
@@ -462,6 +500,13 @@ def evaluate_arousal_mae(
     print(f"Pearson R (arousal) G: {pearson_arousal:.4f}")
     print(f"Pearson R (valence) G: {pearson_valence:.4f}")
     
+    arousal_float_predictions = arousal_predictions_continuous_H.float().view(-1)
+    valence_float_predictions = valence_predictions_continuous_H.float().view(-1)
+    pearson_arousal = torch.corrcoef(torch.stack([arousal_float_predictions,arousal_float_labels]))[0,1]
+    pearson_valence = torch.corrcoef(torch.stack([valence_float_predictions,valence_float_labels]))[0,1]
+    print(f"Pearson R (arousal) H: {pearson_arousal:.4f}")
+    print(f"Pearson R (valence) H: {pearson_valence:.4f}")
+    
     
     return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1, pearson_arousal, pearson_valence)
 
@@ -499,7 +544,6 @@ def main(inputArguments):
 
     dataset = Dataset(
         g_ArgParse.get("dataPath"), 
-        g_ArgParse.get("lexiconLookupPath"), 
         robertaA, robertaB, robertaD, robertaG, robertaH
     )
     dataset.printSetDistribution()
