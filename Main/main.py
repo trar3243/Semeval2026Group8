@@ -20,6 +20,11 @@ optional_arguments = {
     "numEpochs": 5,
     "batchSize": 16,
     "learningRate": 1e-3,
+    "modelSaveRoot": f"{SEMROOT}/Artifacts/",
+    "modelSaveSpecific": f"{SEMROOT}/Artifacts/epoch=4/models.pt",
+    "devSetPath": f"{SEMROOT}/Data/devset.csv",
+    "trainSetPath": f"{SEMROOT}/Data/trainset.csv",
+    "mode": "eval"
 }
 g_Logger = Logger(__name__)
 g_ArgParse = ArgumentParser()
@@ -33,6 +38,8 @@ main.py
 def initialize(inputArguments):
     print(f"ScriptName: {__file__}")
     g_ArgParse.setArguments(inputArguments, required_arguments, optional_arguments)
+    if(g_ArgParse.get("mode") not in ["train", "eval"]):
+        raise Exception(f"Supplied mode {g_ArgParse.get('mode')} not in train,eval")
     g_ArgParse.printArguments()
 
 def getOrdinalLabel(true_class_indices, num_bins):
@@ -62,12 +69,18 @@ def trainingLoop(
     criterionG = torch.nn.BCEWithLogitsLoss()
     criterionH = torch.nn.BCEWithLogitsLoss()
     number_of_batches = len(train_batch_list)
+    evaluate_arousal_mae(modelA, modelB, modelD, modelG, modelH, dataset)
+    epoch_save_path = g_ArgParse.get("modelSaveRoot") + f"epoch=0/models.pt" 
+    save_model_and_bins(
+        modelA, modelB, modelD,modelG,modelH,
+        dataset.robertaA, dataset.robertaB, dataset.robertaD, dataset.robertaG, dataset.robertaH,
+        epoch_save_path
+    )
     print("Beginning training loop")
         
     for epoch in range(num_epochs):
         dataset.shuffle()
         train_losses = []
-        evaluate_arousal_mae(modelA, modelB, modelD, modelG, modelH, dataset)
         modelA.train()
         modelB.train()
         modelD.train()
@@ -181,6 +194,15 @@ def trainingLoop(
 
         avg_train_loss = sum(train_losses) / max(len(train_losses), 1)
         print(f"Epoch {epoch+1}/{num_epochs} average train loss: {avg_train_loss:.4f}")
+        
+        evaluate_arousal_mae(modelA, modelB, modelD, modelG, modelH, dataset)
+        
+        epoch_save_path = g_ArgParse.get("modelSaveRoot") + f"epoch={epoch+1}/models.pt" 
+        save_model_and_bins(
+            modelA, modelB, modelD,modelG,modelH,
+            dataset.robertaA, dataset.robertaB, dataset.robertaD, dataset.robertaG, dataset.robertaH,
+            epoch_save_path
+        )
 
 
 def evaluate_arousal_mae(
@@ -508,34 +530,35 @@ def evaluate_arousal_mae(
     print(f"Pearson R (valence) H: {pearson_valence:.4f}")
     
     
+    
     return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1, pearson_arousal, pearson_valence)
 
-def save_model_and_bins(model: torch.nn.Module):
-    artifacts_dir = os.path.join(SEMROOT, "Artifacts")
-    os.makedirs(artifacts_dir, exist_ok=True)
+def save_model_and_bins(
+        modelA, modelB, modelD, modelG, modelH, 
+        robertaA, robertaB, robertaD, robertaG, robertaH,
+        path
+    ):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    torch.save({
+        "modelA": modelA.state_dict(),
+        "modelB": modelB.state_dict(),
+        "modelD": modelD.state_dict(),
+        "modelG": modelG.state_dict(),
+        "modelH": modelH.state_dict(),
+        "robertaA": robertaA.getModel().state_dict(),
+        "robertaB": robertaB.getModel().state_dict(),
+        "robertaD": robertaD.getModel().state_dict(),
+        "robertaG": robertaG.getModel().state_dict(),
+        "robertaH": robertaH.getModel().state_dict()
+    }, path)
+    print(f"Saved models to {path}")
 
-    save_path = os.path.join(artifacts_dir, "arousal_head.pt")
-
-    bin_centers = [0.0, 1.0, 2.0]
-    bin_edges = [0.0, 1.0, 2.0]
-
-    state = {
-        "state_dict": model.state_dict(),
-        "feature_dim": getattr(model, "input_dimension_size", 768),
-        "num_classes": 3,
-        "task": "arousal",
-        "bin_centers": bin_centers,
-        "bin_edges": bin_edges,
-        "label_mapping": {0: 0.0, 1: 1.0, 2: 2.0},
-    }
-
-    torch.save(state, save_path)
-    print(f"Saved model and bin metadata to: {save_path}")
 
 
 def main(inputArguments):
     initialize(inputArguments)
-
+    eval_mode = (g_ArgParse.get("mode") == "eval")
+    dataPath = g_ArgParse.get("dataPath") 
     robertaA = Roberta()
     robertaB = Roberta()
     robertaD = Roberta()
@@ -543,8 +566,9 @@ def main(inputArguments):
     robertaH = Roberta()
 
     dataset = Dataset(
-        g_ArgParse.get("dataPath"), 
-        robertaA, robertaB, robertaD, robertaG, robertaH
+        dataPath, 
+        robertaA, robertaB, robertaD, robertaG, robertaH,
+        eval_mode=eval_mode, devSetPath=g_ArgParse.get("devSetPath"), trainSetPath=g_ArgParse.get("trainSetPath")
     )
     dataset.printSetDistribution()
 
@@ -554,44 +578,57 @@ def main(inputArguments):
     modelG = VersionGAffectClassifier(dataset.number_of_users)
     modelH = VersionHAffectClassifier(dataset.number_of_users)
 
-    learning_rate = float(g_ArgParse.get("learningRate"))
+    if(eval_mode):
+        print("Working in eval mode. Evaluating presaved models.")
+        checkpoint = torch.load(g_ArgParse.get("modelSaveSpecific"), map_location="cpu")
+        modelA.load_state_dict(checkpoint["modelA"])
+        modelB.load_state_dict(checkpoint["modelB"])
+        modelD.load_state_dict(checkpoint["modelD"])
+        modelG.load_state_dict(checkpoint["modelG"])
+        modelH.load_state_dict(checkpoint["modelH"])
+        robertaA.getModel().load_state_dict(checkpoint["robertaA"])
+        robertaB.getModel().load_state_dict(checkpoint["robertaB"])
+        robertaD.getModel().load_state_dict(checkpoint["robertaD"])
+        robertaG.getModel().load_state_dict(checkpoint["robertaG"])
+        robertaH.getModel().load_state_dict(checkpoint["robertaH"])
+        evaluate_arousal_mae(modelA, modelB, modelD, modelG, modelH, dataset)
+    else:
+        print("Working in training mode.")
+        learning_rate = float(g_ArgParse.get("learningRate"))
 
-    optimizerA = torch.optim.AdamW([
-        {"params": modelA.parameters(), "lr": learning_rate},
-        {"params": robertaA.getParameters(), "lr": 2e-5},
-    ])
-    optimizerB = torch.optim.AdamW([
-        {"params": modelB.parameters(), "lr": learning_rate},
-        {"params": robertaB.getParameters(), "lr": 2e-5},
-    ])
-    optimizerD = torch.optim.AdamW([
-        {"params": modelD.parameters(), "lr": learning_rate},
-        {"params": robertaD.getParameters(), "lr": 2e-5},
-    ])
+        optimizerA = torch.optim.AdamW([
+            {"params": modelA.parameters(), "lr": learning_rate},
+            {"params": robertaA.getParameters(), "lr": 2e-5},
+        ])
+        optimizerB = torch.optim.AdamW([
+            {"params": modelB.parameters(), "lr": learning_rate},
+            {"params": robertaB.getParameters(), "lr": 2e-5},
+        ])
+        optimizerD = torch.optim.AdamW([
+            {"params": modelD.parameters(), "lr": learning_rate},
+            {"params": robertaD.getParameters(), "lr": 2e-5},
+        ])
 
-    optimizerG = torch.optim.AdamW([
-        {"params": modelG.parameters(), "lr": learning_rate},
-        {"params": robertaG.getParameters(), "lr": 2e-5}
-    ])
+        optimizerG = torch.optim.AdamW([
+            {"params": modelG.parameters(), "lr": learning_rate},
+            {"params": robertaG.getParameters(), "lr": 2e-5}
+        ])
 
-    optimizerH = torch.optim.AdamW([
-        {"params": modelH.parameters(), "lr": learning_rate},
-        {"params": robertaH.getParameters(), "lr": 2e-5},  # separate encoder for H
-    ])
-
+        optimizerH = torch.optim.AdamW([
+            {"params": modelH.parameters(), "lr": learning_rate},
+            {"params": robertaH.getParameters(), "lr": 2e-5},  # separate encoder for H
+        ])
     
-    trainingLoop(
-        modelA, modelB, modelD, modelG, modelH,
-        optimizerA, optimizerB, optimizerD, optimizerG, optimizerH, 
-        dataset
-    )
+        dataset.writeOutDevSet()
+        dataset.writeOutTrainSet()
 
-    evaluate_arousal_mae(
-        modelA, modelB, modelD, modelG, modelH, 
-        dataset
-    )
+        trainingLoop(
+            modelA, modelB, modelD, modelG, modelH,
+            optimizerA, optimizerB, optimizerD, optimizerG, optimizerH, 
+            dataset
+        )
 
-    save_model_and_bins(modelA)
+
 
 
 if __name__ == "__main__":
