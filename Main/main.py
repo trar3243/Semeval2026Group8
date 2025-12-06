@@ -532,6 +532,33 @@ def evaluate_arousal_mae(
     print(f"Pearson R (arousal) H: {pearson_arousal:.4f}")
     print(f"Pearson R (valence) H: {pearson_valence:.4f}")
     
+    #SEEN VS UNSEEN PEARSON R
+    all_user_indices = torch.cat([batch.getUserIndices() for batch in dataset.getDevBatchList()], dim=0)
+    #Seen mask and unseen mask
+    seen_mask = torch.tensor([uid in dataset.train_user_ids for uid in all_user_indices], dtype = torch.bool)
+    unseen_mask = torch.tensor([uid not in dataset.train_user_ids for uid in all_user_indices], dtype = torch.bool)
+
+    #Seen User Pearson
+    if seen_mask.sum() > 0:
+        pearson_arousal_seen = torch.corrcoef(torch.stack([arousal_predictions_continuous[seen_mask].float(), arousal_labels[seen_mask].float()]))[0,1]
+        pearson_valence_seen = torch.corrcoef(torch.stack([valence_predictions_continuous[seen_mask].float(), valence_labels[seen_mask].float()]))[0,1]
+
+        print(f"Pearson R (arousal) Seen Users: {pearson_arousal_seen:.4f}")
+        print(f"Pearson R (valence) Seen Users: {pearson_valence_seen:.4f}")
+    else:
+        pearson_arousal_seen = float('nan')
+        pearson_valence_seen = float('nan')
+
+    #Unseen User Pearson
+    if unseen_mask.sum() > 0:
+        pearson_arousal_unseen = torch.corrcoef(torch.stack([arousal_predictions_continuous[unseen_mask].float(), arousal_labels[unseen_mask].float()]))[0,1]
+        pearson_valence_unseen = torch.corrcoef(torch.stack([valence_predictions_continuous[unseen_mask].float(), valence_labels[unseen_mask].float()]))[0,1]
+
+        print(f"Pearson R (arousal) Unseen Users: {pearson_arousal_unseen:.4f}")
+        print(f"Pearson R (valence) Unseen Users: {pearson_valence_unseen:.4f}")
+    else:
+        pearson_arousal_unseen = float('nan')
+        pearson_valence_unseen = float('nan')
     
     #CONFUSION MATRICIES
     arousal_predictions_numpy = arousal_predictions.cpu().numpy()
@@ -655,7 +682,7 @@ def evaluate_arousal_mae(
 
 
     
-    return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1, pearson_arousal, pearson_valence)
+    return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1, pearson_arousal, pearson_valence, pearson_arousal_unseen, pearson_valence_unseen, pearson_arousal_seen, pearson_valence_seen)
 
 def save_model_and_bins(
         modelA, modelB, modelD, modelG, modelH, 
