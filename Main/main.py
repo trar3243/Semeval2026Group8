@@ -5,7 +5,8 @@ import torch.nn.functional as F
 from torchmetrics.classification import F1Score, Accuracy, Precision, Recall
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+from collections import Counter
 
 SEMROOT = os.environ['SEMROOT']
 sys.path.append(SEMROOT)
@@ -684,6 +685,44 @@ def evaluate_arousal_mae(
     
     return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1, pearson_arousal, pearson_valence, pearson_arousal_unseen, pearson_valence_unseen, pearson_arousal_seen, pearson_valence_seen)
 
+def dataset_analysis(dataset: Dataset):
+    #Get all arousal, valence labels
+    all_arousal_labels = []
+    all_valence_labels = []
+    for batch in dataset.getTrainBatchList():
+        all_arousal_labels.append(batch.arousalLabelList)
+        all_valence_labels.append(batch.valenceLabelList)
+    all_arousal_labels = torch.cat(all_arousal_labels).long()
+    all_valence_labels = torch.cat(all_valence_labels).long()
+
+    #Get counts of each value for arousal, valence. Print.
+    arousal_count = Counter(all_arousal_labels.tolist())
+    valence_count = Counter(all_valence_labels.tolist())
+    print("Dataset Arousal Counts - By Value")
+    for value, count in sorted(arousal_count.items()):
+        print(f"Arousal {value}: {count} instances")
+    print("Dataset Valence Counts - By Value")
+    for value, count in sorted(valence_count.items()):
+        print(f"Valence {value}: {count} instances")
+
+    #Seaborn plot to show distribution of arousal/valence
+    arousal_axes = [-1, 0, 1]
+    valence_axes = [-2, -1, 0, 1, 2]
+    
+    heatmap = torch.zeros((3,5), dtype=int)
+    arousal_map = {-1:0,0:1,1:2}
+    valence_map = {-2:0,-1:1,0:2,1:3,2:4}
+
+    for a, v in zip(all_arousal_labels.tolist(), all_valence_labels.tolist()):
+        heatmap[arousal_map[a], valence_map[v]] += 1
+
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(heatmap.numpy(), annot=True, fmt='d', cmap="Oranges", xticklabels=valence_axes, yticklabels=arousal_axes)
+    plt.xlabel("Valence")
+    plt.ylabel("Arousal")
+    plt.title('Dataset Distribution of Arousal Vs Valence Labels')
+    plt.show()
+
 def save_model_and_bins(
         modelA, modelB, modelD, modelG, modelH, 
         robertaA, robertaB, robertaD, robertaG, robertaH,
@@ -743,6 +782,7 @@ def main(inputArguments):
         robertaG.getModel().load_state_dict(checkpoint["robertaG"])
         robertaH.getModel().load_state_dict(checkpoint["robertaH"])
         evaluate_arousal_mae(modelA, modelB, modelD, modelG, modelH, dataset)
+        dataset_analysis(dataset)
     else:
         print("Working in training mode.")
         learning_rate = float(g_ArgParse.get("learningRate"))
@@ -778,8 +818,7 @@ def main(inputArguments):
             optimizerA, optimizerB, optimizerD, optimizerG, optimizerH, 
             dataset
         )
-
-
+    
 
 
 if __name__ == "__main__":
