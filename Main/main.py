@@ -3,6 +3,9 @@ import sys, os, random
 import torch
 import torch.nn.functional as F
 from torchmetrics.classification import F1Score, Accuracy, Precision, Recall
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt 
 
 SEMROOT = os.environ['SEMROOT']
 sys.path.append(SEMROOT)
@@ -530,6 +533,127 @@ def evaluate_arousal_mae(
     print(f"Pearson R (valence) H: {pearson_valence:.4f}")
     
     
+    #CONFUSION MATRICIES
+    arousal_predictions_numpy = arousal_predictions.cpu().numpy()
+    arousal_labels_numpy = arousal_labels.cpu().numpy()
+    valence_predictions_numpy = valence_predictions.cpu().numpy()
+    valence_labels_numpy = valence_labels.cpu().numpy()
+
+    arousal_confusion = confusion_matrix(arousal_labels_numpy,arousal_predictions_numpy)
+    valence_confusion = confusion_matrix(valence_labels_numpy,valence_predictions_numpy)
+
+    #SEABORN CONFUSION MATRIX PLOTS
+    arousal_axes = [-1, 0, 1]
+    valence_axes = [-2, -1, 0, 1, 2]
+    
+    plt.figure(figsize=(6,5))
+    sns.heatmap(arousal_confusion, annot=True, fmt="d", cmap="Blues", xticklabels=arousal_axes, yticklabels=arousal_axes)
+    plt.title("Composite - Arousal Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+    plt.figure(figsize=(6,5))
+    sns.heatmap(valence_confusion, annot=True, fmt="d", cmap="Blues", xticklabels=valence_axes, yticklabels=valence_axes)
+    plt.title("Composite - Valence Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+    #INDIVIDUAL MODEL MATRICIES
+    arousal_predictions_numpy_A = arousal_predictions_A.cpu().numpy()
+    valence_predictions_numpy_A = valence_predictions_A.cpu().numpy()
+    arousal_predictions_numpy_B = arousal_predictions_B.cpu().numpy()
+    valence_predictions_numpy_B = valence_predictions_B.cpu().numpy()
+    arousal_predictions_numpy_D = arousal_predictions_D.cpu().numpy()
+    valence_predictions_numpy_D = valence_predictions_D.cpu().numpy()
+    arousal_predictions_numpy_G = arousal_predictions_G.cpu().numpy()
+    valence_predictions_numpy_G = valence_predictions_G.cpu().numpy()
+    arousal_predictions_numpy_H = arousal_predictions_H.cpu().numpy()
+    valence_predictions_numpy_H = valence_predictions_H.cpu().numpy()
+
+    arousal_confusion_A = confusion_matrix(arousal_labels_numpy,arousal_predictions_numpy_A)
+    valence_confusion_A = confusion_matrix(valence_labels_numpy,valence_predictions_numpy_A)
+    arousal_confusion_B = confusion_matrix(arousal_labels_numpy,arousal_predictions_numpy_B)
+    valence_confusion_B = confusion_matrix(valence_labels_numpy,valence_predictions_numpy_B)
+    arousal_confusion_D = confusion_matrix(arousal_labels_numpy,arousal_predictions_numpy_D)
+    valence_confusion_D = confusion_matrix(valence_labels_numpy,valence_predictions_numpy_D)
+    arousal_confusion_G = confusion_matrix(arousal_labels_numpy,arousal_predictions_numpy_G)
+    valence_confusion_G = confusion_matrix(valence_labels_numpy,valence_predictions_numpy_G)
+    arousal_confusion_H = confusion_matrix(arousal_labels_numpy,arousal_predictions_numpy_H)
+    valence_confusion_H = confusion_matrix(valence_labels_numpy,valence_predictions_numpy_H)
+
+    plt.figure(figsize=(6,5))
+    sns.heatmap(arousal_confusion_A, annot=True, fmt="d", cmap="Blues", xticklabels=arousal_axes, yticklabels=arousal_axes)
+    plt.title("MODEL A - Arousal Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+    plt.figure(figsize=(6,5))
+    sns.heatmap(valence_confusion_A, annot=True, fmt="d", cmap="Blues", xticklabels=valence_axes, yticklabels=valence_axes)
+    plt.title("MODEL A - Valence Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+    plt.figure(figsize=(6,5))
+    sns.heatmap(arousal_confusion_B, annot=True, fmt="d", cmap="Blues", xticklabels=arousal_axes, yticklabels=arousal_axes)
+    plt.title("MODEL B - Arousal Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+    plt.figure(figsize=(6,5))
+    sns.heatmap(valence_confusion_B, annot=True, fmt="d", cmap="Blues", xticklabels=valence_axes, yticklabels=valence_axes)
+    plt.title("MODEL B - Valence Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+    plt.figure(figsize=(6,5))
+    sns.heatmap(arousal_confusion_D, annot=True, fmt="d", cmap="Blues", xticklabels=arousal_axes, yticklabels=arousal_axes)
+    plt.title("MODEL D - Arousal Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+    plt.figure(figsize=(6,5))
+    sns.heatmap(valence_confusion_D, annot=True, fmt="d", cmap="Blues", xticklabels=valence_axes, yticklabels=valence_axes)
+    plt.title("MODEL D - Valence Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+    plt.figure(figsize=(6,5))
+    sns.heatmap(arousal_confusion_G, annot=True, fmt="d", cmap="Blues", xticklabels=arousal_axes, yticklabels=arousal_axes)
+    plt.title("MODEL G - Arousal Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+    plt.figure(figsize=(6,5))
+    sns.heatmap(valence_confusion_G, annot=True, fmt="d", cmap="Blues", xticklabels=valence_axes, yticklabels=valence_axes)
+    plt.title("MODEL G - Valence Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+    
+    plt.figure(figsize=(6,5))
+    sns.heatmap(arousal_confusion_H, annot=True, fmt="d", cmap="Blues", xticklabels=arousal_axes, yticklabels=arousal_axes)
+    plt.title("MODEL H - Arousal Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+    plt.figure(figsize=(6,5))
+    sns.heatmap(valence_confusion_H, annot=True, fmt="d", cmap="Blues", xticklabels=valence_axes, yticklabels=valence_axes)
+    plt.title("MODEL H - Valence Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.show()
+
+
     
     return (valence_mae, arousal_mae, f1ScoreArousal, f1ScoreValence, AccuracyArousal, AccuracyValence, PrecisionArousal, PrecisionValence, RecallArousal, RecallValence, CombinedF1, pearson_arousal, pearson_valence)
 
