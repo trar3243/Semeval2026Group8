@@ -85,9 +85,6 @@ class Dataset:
         
         self.__set_user_indices__()
 
-        self.train_user_ids = {e.user_id_index for e in self.trainSet}
-        self.dev_user_ids = {e.user_id_index for e in self.devSet}
-        
         self.trainBatchList = None
         self.devBatchList = None
 
