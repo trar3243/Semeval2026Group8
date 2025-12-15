@@ -1,6 +1,7 @@
 # SemEval 2026 Task 2: Valence & Arousal Prediction
 
-This repository contains our system submission for **SemEval 2026 Task 2**, focused on predicting **valence** and **arousal** from textual data. Our approach combines **transformer embeddings**, **lexical and statistical features**, **user embeddings**, and **ensemble modeling**.
+This repository contains our system submission for **SemEval 2026 Task 2**, focused on predicting **valence** and **arousal** from textual data. Our approach combines **RoBERTa-based text embeddings**, a small set of **additional input features** (user embeddings and an `is_words` flag), and an ensemble of **five diverse constituent models** spanning continuous, categorical, and ordinal-regression frameworks.
+
 
 **Final Paper (PDF):** [SemEval-2026 Task 2: A Diverse Ensemble for Emotional
 State Prediction](https://github.com/trar3243/Semeval2026Group8/blob/main/Semeval2026_Task2_FinalPaper.pdf)
