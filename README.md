@@ -7,12 +7,11 @@ This repository contains our system submission for **SemEval 2026 Task 2**, focu
 ---
 
 ## Key Features
-- RoBERTa-based text encoder for multilingual affect representation  
+- RoBERTa-based text encoder for lingual affect representation  
 - Lexical + statistical feature extraction (e.g., affective lexicons, metadata)  
 - User embeddings to incorporate author-level behavioral signal  
-- Two ensemble model variants (`Version A` and `Version B`) implemented in a modular PyTorch architecture  
+- 5 ensemble model variants implemented in a modular PyTorch architecture  
 - Joint regression heads for valence and arousal prediction  
-- Evaluation using **CCC (Concordance Correlation Coefficient)** per SemEval guidelines  
 
 ---
 
