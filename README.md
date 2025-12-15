@@ -4,7 +4,6 @@ This repository contains our system submission for **SemEval 2026 Task 2**, focu
 
 **Final Paper (PDF):** [Link to final paper](./FinalPaper.pdf)
 
----
 
 ## Key Features
 - RoBERTa-based encoder using CLS embeddings for text representation
@@ -12,7 +11,6 @@ This repository contains our system submission for **SemEval 2026 Task 2**, focu
 - Ensemble of 5 diverse constituent models (A, B, D, G, H), combining continuous, categorical, and ordinal-regression approaches
 - Joint regression heads for valence and arousal prediction  
 
----
 
 ## Repository Structure
 
@@ -34,7 +32,7 @@ This repository contains our system submission for **SemEval 2026 Task 2**, focu
 - `README.md`
 
 
--- 
+ 
 ### Set Project Root
 export SEMROOT=/path/to/Semeval2026Group8
 
@@ -44,13 +42,12 @@ export SEMROOT=/path/to/Semeval2026Group8
 ### Run main.py
 python Main/main.py --model_version A --epochs 10 --batch_size 16
 
---
 
 
 ## Model Overview
 <img width="677" height="356" alt="Screenshot 2025-12-15 at 9 51 42 AM" src="https://github.com/user-attachments/assets/eb1181ba-6864-4369-8009-105d7b1c14df" />
 
-## 📈 Evaluation
+## Evaluation
 
 Metrics used in this work include:
 
@@ -63,8 +60,6 @@ Metrics used in this work include:
 
 The ensemble model outperforms all individual constituent models across metrics, including MAE and F1, and achieves the strongest **Pearson’s R** values for both valence and arousal.
 
-
----
 
 ## 👥 Team
 - **Troy Arthur**
