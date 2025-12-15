@@ -5,7 +5,7 @@ This repository contains our system submission for **SemEval 2026 Task 2**, focu
 **Final Paper (PDF):** [SemEval-2026 Task 2: A Diverse Ensemble for Emotional
 State Prediction](https://github.com/trar3243/Semeval2026Group8/blob/main/Semeval2026_Task2_FinalPaper.pdf)
 
-**Final Video** [NLP Semeval Task 2 Group 8 Video]https://vimeo.com/1145176930?share=copy&fl=sv&fe=ci
+**Final Video** [NLP Semeval Task 2 Group 8 Video](https://vimeo.com/1145176930?share=copy&fl=sv&fe=ci)
 
 
 ## Key Features
