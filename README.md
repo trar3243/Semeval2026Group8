@@ -1,10 +1,3 @@
-# Semeval2026Group8
-Valence and Arousal
-
-Initialization instructions:
-To install all unmet dependencies, call ./installDependencies.sh 
-To add global environment variable SEMROOT, call source ./.env
-
 # SemEval 2026 Task 2: Valence & Arousal Prediction
 
 This repository contains our system submission for **SemEval 2026 Task 2**, focused on predicting **valence** and **arousal** from textual data. Our approach combines **transformer embeddings**, **lexical and statistical features**, **user embeddings**, and **ensemble modeling**.
@@ -46,6 +39,9 @@ This repository contains our system submission for **SemEval 2026 Task 2**, focu
 -- 
 ### Set Project Root
 export SEMROOT=/path/to/Semeval2026Group8
+
+### To install all unmet dependencies
+./installDependencies.sh 
 
 ### Set Project Root
 python Main/main.py --model_version A --epochs 10 --batch_size 16
