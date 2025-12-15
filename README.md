@@ -7,10 +7,9 @@ This repository contains our system submission for **SemEval 2026 Task 2**, focu
 ---
 
 ## Key Features
-- RoBERTa-based text encoder for lingual affect representation  
-- Lexical + statistical feature extraction (e.g., affective lexicons, metadata)  
+- RoBERTa-based encoder using CLS embeddings for text representation
 - User embeddings to incorporate author-level behavioral signal  
-- 5 ensemble model variants implemented in a modular PyTorch architecture  
+- Ensemble of 5 diverse constituent models (A, B, D, G, H), combining continuous, categorical, and ordinal-regression approaches
 - Joint regression heads for valence and arousal prediction  
 
 ---
@@ -29,7 +28,7 @@ This repository contains our system submission for **SemEval 2026 Task 2**, focu
   - `utils/` — Logging, argument parsing, metrics
 
 - **Data/**
-  - `train/`, `dev/`, `test/` *(not included)*
+  - `TRAIN_RELEASE_3SEP2025/`
 
 - `requirements.txt`
 - `README.md`
@@ -39,14 +38,11 @@ This repository contains our system submission for **SemEval 2026 Task 2**, focu
 ### Set Project Root
 export SEMROOT=/path/to/Semeval2026Group8
 
-### To install all unmet dependencies
+### Install all unmet dependencies
 ./installDependencies.sh 
 
-### Set Project Root
+### Run main.py
 python Main/main.py --model_version A --epochs 10 --batch_size 16
-
-### Inference
-python Main/predict.py --input input.jsonl --output predictions.json
 
 --
 
@@ -56,9 +52,17 @@ python Main/predict.py --input input.jsonl --output predictions.json
 
 ## 📈 Evaluation
 
-Metrics include:
-- **CCC (Concordance Correlation Coefficient)**
-- **MSE**
+Metrics used in this work include:
+
+- **Pearson’s R (primary metric)**
+- **MAE (Mean Absolute Error)**
+- **Precision**
+- **Recall**
+- **Accuracy**
+- **F1 Score**
+
+The ensemble model outperforms all individual constituent models across metrics, including MAE and F1, and achieves the strongest **Pearson’s R** values for both valence and arousal.
+
 
 ---
 
