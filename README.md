@@ -2,7 +2,8 @@
 
 This repository contains our system submission for **SemEval 2026 Task 2**, focused on predicting **valence** and **arousal** from textual data. Our approach combines **transformer embeddings**, **lexical and statistical features**, **user embeddings**, and **ensemble modeling**.
 
-**Final Paper (PDF):** [Link to final paper](./FinalPaper.pdf)
+**Final Paper (PDF):** [Link to final paper](https://github.com/trar3243/Semeval2026Group8/blob/main/Semeval2026_Task2_FinalPaper.pdf))
+**Final Video** [NLP Semeval Task 2 Group 8 Video]https://vimeo.com/1145176930?share=copy&fl=sv&fe=ci
 
 
 ## Key Features
@@ -61,7 +62,7 @@ Metrics used in this work include:
 The ensemble model outperforms all individual constituent models across metrics, including MAE and F1, and achieves the strongest **Pearson’s R** values for both valence and arousal.
 
 
-## 👥 Team
+## Team
 - **Troy Arthur**
 - **Sierra Reschke**
 - **Aidan Kelley**
